@@ -1,5 +1,8 @@
 import { IChat } from '@/types/chat';
 import { Loader2 } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 export default function Sidebar({
   chats,
@@ -11,40 +14,44 @@ export default function Sidebar({
   onSelect: any;
 }) {
   return (
-    <div className='flex flex-col gap-4 w-3xs bg-white p-5 shadow-md border-1 overflow-auto'>
-      <h3 style={{ marginBottom: '20px' }}>Recent Conversations</h3>
-      {loading ? (
-        <Loader2 className='h-6 w-6 animate-spin mx-auto my-2' />
-      ) : (
-        chats.map(({ chatRoomId, user, offeredSkill, requestedSkill }) => (
-          <div
-            className='cursor-pointer pb-4 border-b'
-            key={chatRoomId}
-            onClick={() =>
-              onSelect({ chatRoomId, user, offeredSkill, requestedSkill })
-            }
-          >
-            <div className='flex items-center cursor-pointer gap-4 pb-4'>
-              <div className='w-8 h-8 bg-[#ddd] rounded-full flex items-center justify-center text-sm text-[#555] font-semibold'>
-                {user.name.split(' ')[0]?.[0]?.toUpperCase()}
-              </div>
-              <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>
-                {user.name}
-              </span>
-            </div>
-
-            <div className='flex  justify-between px-1 gap-1'>
-              <div className='truncate whitespace-nowrap overflow-hidden text-ellipsis flex-1'>
-                {offeredSkill}
-              </div>{' '}
-              ↔{' '}
-              <div className='truncate whitespace-nowrap overflow-hidden text-ellipsis flex-1 text-right'>
-                {requestedSkill}
-              </div>
-            </div>
+    <aside className='flex w-80 flex-col border-r bg-white/60 backdrop-blur supports-[backdrop-filter]:bg-white/70'>
+      <div className='px-5 pt-5'>
+        <h3 className='text-sm font-semibold tracking-wide text-gray-700'>Recent Conversations</h3>
+      </div>
+      <Separator className='my-4 opacity-60' />
+      <ScrollArea className='h-full'>
+        {loading ? (
+          <div className='flex items-center justify-center py-6'>
+            <Loader2 className='h-6 w-6 animate-spin text-gray-500' />
           </div>
-        ))
-      )}
-    </div>
+        ) : (
+          <div className='px-2'>
+            {chats.map(({ chatRoomId, user, offeredSkill, requestedSkill }) => (
+              <button
+                className='group flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-left transition hover:bg-blue-50/70'
+                key={chatRoomId}
+                onClick={() =>
+                  onSelect({ chatRoomId, user, offeredSkill, requestedSkill })
+                }
+              >
+                <Avatar fallback={user.name.split(' ')[0]?.[0]} />
+                <div className='min-w-0 flex-1'>
+                  <div className='flex items-center justify-between'>
+                    <span className='truncate text-sm font-semibold text-gray-900'>
+                      {user.name}
+                    </span>
+                  </div>
+                  <div className='mt-0.5 flex items-center gap-1 text-xs text-gray-600'>
+                    <span className='truncate'>{offeredSkill}</span>
+                    <span>↔</span>
+                    <span className='truncate'>{requestedSkill}</span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </ScrollArea>
+    </aside>
   );
 }
