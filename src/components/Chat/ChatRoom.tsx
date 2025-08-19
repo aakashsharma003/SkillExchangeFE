@@ -8,6 +8,11 @@ import SockJS from 'sockjs-client';
 import { BASE_URL } from '@/api/auth';
 import { useUser } from '@/context/auth/useUser';
 import { formatTimeAgo } from '@/utils/date';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Avatar } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 const WEBSOCKET_URL = BASE_URL + '/ws-chat';
 
@@ -109,77 +114,71 @@ export default function ChatRoom({
   }, [messages]);
 
   return (
-    <div className='flex flex-1 flex-col'>
-      <div className='p-5 border-b-[1px] border-[#ddd] border-solid flex justify-between items-center bg-white'>
-        <div>
-          <h2>Chat with {user.name}</h2>
-          <h3>
-            You learn
-            <span className='font-semibold'> {requestedSkill} </span>
-            and teach <span className='font-semibold'>{offeredSkill}</span>
-          </h3>
+    <div className='flex flex-1 flex-col bg-gradient-to-b from-white to-blue-50/40'>
+      <div className='flex items-center justify-between border-b bg-white/70 px-5 py-4 backdrop-blur supports-[backdrop-filter]:bg-white/80'>
+        <div className='flex items-center gap-3'>
+          <Avatar fallback={user.name.split(' ')[0]?.[0]} />
+          <div>
+            <h2 className='text-sm font-semibold leading-tight text-gray-900'>Chat with {user.name}</h2>
+            <h3 className='text-xs text-gray-600'>
+              You learn <span className='font-semibold'>{requestedSkill}</span> and teach <span className='font-semibold'>{offeredSkill}</span>
+            </h3>
+          </div>
         </div>
-        <button className='px-5 py-2 bg-[#3b82f6] text-white border-none rounded-sm cursor-pointer'>
-          Start Video Call
-        </button>
+        <Button className='bg-gradient-to-r from-blue-600 to-teal-500 text-white shadow hover:scale-[1.01] transition-transform'>Start Video Call</Button>
       </div>
 
       {/* Chat Messages */}
-      <div
-        className='flex-1 p-5 flex flex-col gap-4 bg-[#f0f2f5] overflow-auto'
-        ref={containerRef}
-      >
-        {loading ? (
-          <div className='flex h-full flex-col justify-end gap-4'>
-            <div className='rect skeleton-content bg-[#dbeafe]'></div>
-            <div className='rect skeleton-content self-end bg-[#d1fae5]'></div>
-            <div className='rect skeleton-content bg-[#dbeafe]'></div>
-            <div className='rect skeleton-content self-end bg-[#d1fae5]'></div>
-          </div>
-        ) : (
-          messages.map(msg => (
-            <div
-              key={msg.id}
-              className='flex'
-              style={{
-                justifyContent:
-                  msg.senderId !== user.id ? 'flex-end' : 'flex-start',
-              }}
-            >
-              <div
-                className='px-4 py-2 rounded-[10px] text-base max-w-[60%]'
-                style={{
-                  backgroundColor:
-                    msg.senderId !== user.id ? '#d1fae5' : '#dbeafe',
-                }}
-              >
-                <div>{msg.message}</div>
-
-                <div className='text-[10px] text-gray-600 text-right italic'>
-                  {formatTimeAgo(msg.createdAt)}
-                </div>
-              </div>
+      <ScrollArea className='flex-1'>
+        <div className='flex min-h-full flex-col gap-3 bg-transparent p-5' ref={containerRef}>
+          {loading ? (
+            <div className='flex h-full flex-col justify-end gap-4'>
+              <div className='rect skeleton-content bg-[#dbeafe]'></div>
+              <div className='rect skeleton-content self-end bg-[#d1fae5]'></div>
+              <div className='rect skeleton-content bg-[#dbeafe]'></div>
+              <div className='rect skeleton-content self-end bg-[#d1fae5]'></div>
             </div>
-          ))
-        )}
-      </div>
+          ) : (
+            messages.map(msg => {
+              const isMe = msg.senderId !== user.id;
+              return (
+                <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                  <div
+                    className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm shadow-sm transition [transform:perspective(1000px)_translateZ(0)] ${
+                      isMe
+                        ? 'bg-emerald-50 text-emerald-900 shadow-emerald-100'
+                        : 'bg-blue-50 text-blue-900 shadow-blue-100'
+                    }`}
+                  >
+                    <div>{msg.message}</div>
+                    <div className='mt-1 text-[10px] italic text-gray-500'>{formatTimeAgo(msg.createdAt)}</div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </ScrollArea>
 
-      <div className='flex p-4 border-t-[1px] border-[#ddd] bg-white'>
-        <input
-          type='text'
-          placeholder='Type your message...'
+      <Separator />
+      <div className='flex items-center gap-2 bg-white/70 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80'>
+        <Input
+          placeholder='Type your message…'
           value={newMessage}
           onChange={({ target }) => setNewMessage(target.value)}
-          className='flex-1 p-2 border-[1px] border-[#ccc] rounded-sm mr-2'
+          onKeyDown={e => {
+            if (e.key === 'Enter') sendMessage(newMessage);
+          }}
+          className='flex-1'
         />
-        <button
+        <Button
           onClick={() => {
             sendMessage(newMessage);
           }}
-          className='px-5 py-2 bg-[#3b82f6] border-none text-white cursor-pointer rounded-sm'
+          className='bg-gradient-to-r from-blue-600 to-teal-500 text-white'
         >
           Send
-        </button>
+        </Button>
       </div>
     </div>
   );
