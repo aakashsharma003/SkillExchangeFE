@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Phone } from 'lucide-react';
 
 const WEBSOCKET_URL = BASE_URL + '/ws-chat';
 
@@ -114,18 +115,21 @@ export default function ChatRoom({
   }, [messages]);
 
   return (
-    <div className='flex flex-1 flex-col bg-gradient-to-b from-white to-blue-50/40'>
-      <div className='flex items-center justify-between border-b bg-white/70 px-5 py-4 backdrop-blur supports-[backdrop-filter]:bg-white/80'>
+    <div className='flex flex-1 flex-col bg-background'>
+      <div className='flex items-center justify-between border-b bg-card px-5 py-4'>
         <div className='flex items-center gap-3'>
           <Avatar fallback={user.name.split(' ')[0]?.[0]} />
           <div>
-            <h2 className='text-sm font-semibold leading-tight text-gray-900'>Chat with {user.name}</h2>
-            <h3 className='text-xs text-gray-600'>
+            <h2 className='text-sm font-semibold leading-tight'>Chat with {user.name}</h2>
+            <h3 className='text-xs text-muted-foreground'>
               You learn <span className='font-semibold'>{requestedSkill}</span> and teach <span className='font-semibold'>{offeredSkill}</span>
             </h3>
           </div>
         </div>
-        <Button className='bg-gradient-to-r from-blue-600 to-teal-500 text-white shadow hover:scale-[1.01] transition-transform'>Start Video Call</Button>
+        <Button variant='secondary' className='gap-2'>
+          <Phone className='h-4 w-4' />
+          Start call
+        </Button>
       </div>
 
       {/* Chat Messages */}
@@ -133,10 +137,10 @@ export default function ChatRoom({
         <div className='flex min-h-full flex-col gap-3 bg-transparent p-5' ref={containerRef}>
           {loading ? (
             <div className='flex h-full flex-col justify-end gap-4'>
-              <div className='rect skeleton-content bg-[#dbeafe]'></div>
-              <div className='rect skeleton-content self-end bg-[#d1fae5]'></div>
-              <div className='rect skeleton-content bg-[#dbeafe]'></div>
-              <div className='rect skeleton-content self-end bg-[#d1fae5]'></div>
+              <div className='rect skeleton-content bg-muted'></div>
+              <div className='rect skeleton-content self-end bg-muted'></div>
+              <div className='rect skeleton-content bg-muted'></div>
+              <div className='rect skeleton-content self-end bg-muted'></div>
             </div>
           ) : (
             messages.map(msg => {
@@ -144,14 +148,14 @@ export default function ChatRoom({
               return (
                 <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                   <div
-                    className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm shadow-sm transition [transform:perspective(1000px)_translateZ(0)] ${
+                    className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm shadow-sm transition ${
                       isMe
-                        ? 'bg-emerald-50 text-emerald-900 shadow-emerald-100'
-                        : 'bg-blue-50 text-blue-900 shadow-blue-100'
+                        ? 'bg-primary/10 text-foreground'
+                        : 'bg-muted text-foreground'
                     }`}
                   >
                     <div>{msg.message}</div>
-                    <div className='mt-1 text-[10px] italic text-gray-500'>{formatTimeAgo(msg.createdAt)}</div>
+                    <div className='mt-1 text-[10px] italic text-muted-foreground'>{formatTimeAgo(msg.createdAt)}</div>
                   </div>
                 </div>
               );
@@ -161,7 +165,7 @@ export default function ChatRoom({
       </ScrollArea>
 
       <Separator />
-      <div className='flex items-center gap-2 bg-white/70 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80'>
+      <div className='flex items-center gap-2 bg-card px-4 py-3'>
         <Input
           placeholder='Type your message…'
           value={newMessage}
@@ -175,7 +179,6 @@ export default function ChatRoom({
           onClick={() => {
             sendMessage(newMessage);
           }}
-          className='bg-gradient-to-r from-blue-600 to-teal-500 text-white'
         >
           Send
         </Button>

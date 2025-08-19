@@ -10,13 +10,11 @@ import toast from 'react-hot-toast';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { BASE_URL } from '@/api/auth';
-import { User } from '@/types/user';
 import { Separator } from '@/components/ui/separator';
 
 const WEBSOCKET_URL = BASE_URL + '/ws-chat';
 
 const Chat: React.FC = () => {
-  const [selectedUser, setSelectedUser] = useState(0);
   const [selectedChat, setSelectedChat] = useState<IChat | null>(null);
 
   const { id } = useUser().user;
@@ -88,21 +86,21 @@ const Chat: React.FC = () => {
 
   if (!chatsLoading && chats.length === 0)
     return (
-      <div className='flex h-screen items-center justify-center bg-gradient-to-b from-white to-blue-50/40'>
-        <div className='rounded-2xl border bg-white/70 p-10 text-center backdrop-blur'>
+      <div className='flex h-screen items-center justify-center bg-background'>
+        <div className='rounded-2xl border bg-card p-10 text-center'>
           <h1 className='text-2xl font-semibold'>No chats yet</h1>
-          <p className='mt-2 text-sm text-gray-600'>Make some exchange requests to access Chats.</p>
+          <p className='mt-2 text-sm text-muted-foreground'>Make some exchange requests to access Chats.</p>
         </div>
       </div>
     );
 
   return (
-    <div className='flex h-screen bg-[radial-gradient(80%_80%_at_50%_-10%,rgba(59,130,246,0.15),transparent)]'>
+    <div className='flex h-screen bg-background'>
       <Sidebar chats={chats} loading={chatsLoading} onSelect={onSelect} />
       <Separator orientation='vertical' />
       {chatsLoading || selectedChat === null ? (
         <div className='flex w-full items-center justify-center'>
-          <Loader2 className='h-10 w-10 animate-spin text-blue-600' />
+          <Loader2 className='h-10 w-10 animate-spin text-muted-foreground' />
         </div>
       ) : (
         <ChatRoom chat={selectedChat} updateChats={updateChats} />
