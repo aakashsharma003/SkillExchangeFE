@@ -27,9 +27,14 @@ const Chat: React.FC = () => {
       try {
         setChatsLoading(true);
         const res = await getChats(id);
-
         if (!res.success) return toast.error(res.message);
-
+          const mappedChats = res.data.map((chat: any) => ({
+            ...chat,
+            chatRoomId: chat.chatroomId || chat.id 
+          }));
+          setChats(mappedChats);
+          if (mappedChats.length > 0) setSelectedChat(mappedChats[0]);
+        console.log("this is the chats",res.data);
         setChats(res.data);
         setChatsLoading(false);
         if (res.data.length !== 0) setSelectedChat(res.data[0]);
@@ -56,9 +61,11 @@ const Chat: React.FC = () => {
     });
 
     stompClient.onConnect = () => {
-      stompClient.subscribe(`/topic/user/${id}`, message => {
-        const receivedMessage: IMessage = JSON.parse(message.body);
-        updateChats(receivedMessage.chatRoomId);
+      // This listener is for updating the SIDEBAR order when a new message arrives
+      stompClient.subscribe(`/topic/user/${id}`, (message) => {
+        const receivedMessage = JSON.parse(message.body);
+        // Ensure the backend response key is 'chatRoomId'
+        updateChats(receivedMessage.chatRoomId); 
       });
     };
 

@@ -7,10 +7,11 @@ export type ICreateChatFormData = {
 };
 
 export type IChat = {
-  chatRoomId: string;
-  user: User;
+  chatRoomId: string; // The ChatRoom ID
+  otherUser: User;
   offeredSkill: string;
   requestedSkill: string;
+  lastActivityAt?: string;
 };
 
 export type IMessage = {

@@ -5,7 +5,7 @@ export type IRequest = {
   senderID: string;
   offeredSkill: string;
   requestedSkill: string;
-  receiverID: string;
+  receiverId: string;
   message: string;
   status: string;
   createdAt: string;
@@ -13,13 +13,18 @@ export type IRequest = {
 };
 
 export type IexchangeRequest = {
-  senderDetails: User;
-  receiverDetails: User;
-  request: IRequest;
+  id: string;
+  requestedSkill: string;
+  offeredSkill: string | null;
+  message: string;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  sender: User;      // Matches "sender" in your JSON
+  receiver: User;    // Matches "receiver" in your JSON
+  createdAt: string;
+  updatedAt: string;
 };
-
 export type IexchangeRequestFormData = {
-  receiverID: string;
+  receiverId: string;
   requestedSkill: string;
   message: string;
 };

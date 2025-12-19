@@ -5,7 +5,7 @@ import { api } from './auth';
 export const createChatRoom = async (payload: ICreateChatFormData) => {
   const token = localStorage.getItem('token');
 
-  const response = await api.post('/chat/create-chat-room', payload, {
+  const response = await api.post('/chat/rooms', payload, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -16,7 +16,7 @@ export const createChatRoom = async (payload: ICreateChatFormData) => {
 export const getChats = async (id: string) => {
   const token = localStorage.getItem('token');
 
-  const response = await api.get('chat/rooms/' + id, {
+  const response = await api.get(`chat/rooms/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -26,11 +26,10 @@ export const getChats = async (id: string) => {
 // Get Chat
 export const getChat = async (chatRoomId: string) => {
   const token = localStorage.getItem('token');
-
-  const response = await api.get(`/chat/room/messages`, {
+  console.log("this is the chatroomid",chatRoomId);
+  const response = await api.get(`chat/rooms/${chatRoomId}/messages`, {
     headers: { Authorization: `Bearer ${token}` },
-    params: { chatRoomId },
   });
-
+    console.log("these are messages",response.data);
   return response.data;
 };

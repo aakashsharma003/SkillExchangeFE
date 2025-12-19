@@ -5,7 +5,7 @@ import { api } from './auth';
 export const getUserProfile = async () => {
   const token = localStorage.getItem('token');
 
-  const response = await api.get('/user/profile', {
+  const response = await api.get('/users/profile', {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -16,7 +16,7 @@ export const getUserProfile = async () => {
 export const updateDetails = async (data: IUpdateUser) => {
   const token = localStorage.getItem('token');
 
-  const response = await api.put('/user/update', data, {
+  const response = await api.put('/users/profile', data, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -27,7 +27,7 @@ export const updateDetails = async (data: IUpdateUser) => {
 export const searchUser = async (skill: string) => {
   const token = localStorage.getItem('token');
 
-  const response = await api.get(`/user/search-user`, {
+  const response = await api.get(`/users/search`, {
     headers: { Authorization: `Bearer ${token}` },
     params: { skill },
   });
@@ -39,7 +39,7 @@ export const searchUser = async (skill: string) => {
 export const fetchUserProfile = async (email: string) => {
   const token = localStorage.getItem('token');
 
-  const response = await api.get(`/user/get-someone-profile`, {
+  const response = await api.get(`/users/`, {
     headers: { Authorization: `Bearer ${token}` },
     params: { email },
   });

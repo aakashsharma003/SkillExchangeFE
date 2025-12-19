@@ -4,7 +4,7 @@ import { api } from './auth';
 export const requestSkillExchange = async (payload: IexchangeRequestFormData) => {
   const token = localStorage.getItem('token');
 
-  const response = await api.post('/skill-exchange/request', payload, {
+  const response = await api.post('/exchange-requests', payload, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -14,7 +14,7 @@ export const requestSkillExchange = async (payload: IexchangeRequestFormData) =>
 export const fetchSentRequests = async () => {
   const token = localStorage.getItem('token');
 
-  const response = await api.get('/skill-exchange/sent-requests', {
+  const response = await api.get('/exchange-requests/sent', {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -24,7 +24,7 @@ export const fetchSentRequests = async () => {
 export const fetchReceivedRequests = async () => {
   const token = localStorage.getItem('token');
 
-  const response = await api.get('/skill-exchange/received-requests', {
+  const response = await api.get('/exchange-requests/received', {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -35,8 +35,8 @@ export const acceptRequest = async (id: string, offeredSkill: string) => {
   const token = localStorage.getItem('token');
 
   const response = await api.put(
-    `/skill-exchange/update-request/${id}`,
-    { status: true, offeredSkill },
+    `/exchange-requests/${id}`,
+    { accepted: true, offeredSkill },
     { headers: { Authorization: `Bearer ${token}` } },
   );
 
@@ -47,7 +47,7 @@ export const rejectRequest = async (id: string) => {
   const token = localStorage.getItem('token');
 
   const response = await api.put(
-    `/skill-exchange/update-request/${id}`,
+    `/exchange-requests/${id}`,
     { status: false },
     { headers: { Authorization: `Bearer ${token}` } },
   );

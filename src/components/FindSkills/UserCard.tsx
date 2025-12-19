@@ -10,7 +10,7 @@ export default function UserCard({
   onClick: () => void;
 }) {
   const navigate = useNavigate();
-  const { name, email, contact, skills } = user;
+  const { fullName, email, phone, skills } = user;
 
   return (
     <div className='bg-white p-5 rounded-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.1)] w-full max-w-xs text-center flex flex-col'>
@@ -18,12 +18,12 @@ export default function UserCard({
         className='w-[100px] h-[100px] bg-[#ddd] rounded-full mx-auto mb-[15px] flex items-center justify-center text-3xl text-[#555] font-bold cursor-pointer'
         onClick={() => navigate(appRoutes.userProfile, { state: email })}
       >
-        {name.split(' ')[0]?.[0]?.toUpperCase()}
+        {fullName.split(' ')[0]?.[0]?.toUpperCase()}
       </div>
 
-      <h2 className='text-xl font-bold mb-1'>{name}</h2>
+      <h2 className='text-xl font-bold mb-1'>{fullName}</h2>
       <p className='mb-1 color-[#666] text-base'>📧 {email}</p>
-      <p className='mb-2 color-[#666] text-base'>📞 {contact}</p>
+      <p className='mb-2 color-[#666] text-base'>📞 {phone}</p>
 
       <div className='mb-4'>
         {skills.map((skill: string, i: number) => (

@@ -32,7 +32,7 @@ const EditProfile = () => {
   const [loading, setLoading] = useState(false);
 
   const handleUpdate = async () => {
-    if (formData.name === '' || formData.contact === '')
+    if (formData.fullName === '' || formData.phone === '')
       return toast.error('Please fill in valid details');
 
     try {
@@ -65,7 +65,7 @@ const EditProfile = () => {
         <Input
           label='Name'
           placeholder='Enter your name'
-          value={formData.name}
+          value={formData.fullName}
           onChange={(val: string) => {
             setFormValue('name', val);
           }}
@@ -81,7 +81,7 @@ const EditProfile = () => {
         <Input
           label='Contact Number'
           placeholder='Enter your contact number'
-          value={formData.contact}
+          value={formData.phone}
           onChange={(value: string) =>
             setFormValue('contact', value.replace(/\D/g, ''))
           }

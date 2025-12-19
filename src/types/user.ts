@@ -1,8 +1,8 @@
 export type User = {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
-  contact: string;
+  phone: string;
   skills: string[];
   githubLink: string | null;
   linkedinLink: string | null;
@@ -13,9 +13,9 @@ export type User = {
 };
 
 export type ISignUp = {
-  name: string;
+  fullName: string;
   email: string;
-  contact: string;
+  phone: string;
   skills: string[];
   password: string;
 };

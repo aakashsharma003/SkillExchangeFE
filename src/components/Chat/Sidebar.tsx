@@ -8,42 +8,60 @@ export default function Sidebar({
 }: {
   chats: IChat[];
   loading: boolean;
-  onSelect: any;
+  onSelect: (chat: IChat) => void;
 }) {
   return (
-    <div className='flex flex-col gap-4 w-3xs bg-white p-5 shadow-md border-1 overflow-auto'>
-      <h3 style={{ marginBottom: '20px' }}>Recent Conversations</h3>
+    <div className='flex flex-col gap-4 w-80 bg-white p-5 shadow-md border-r overflow-auto h-full'>
+      <h3 className="text-lg font-bold border-b pb-4 mb-2">Recent Conversations</h3>
+      
       {loading ? (
-        <Loader2 className='h-6 w-6 animate-spin mx-auto my-2' />
+        <div className="flex justify-center py-10">
+          <Loader2 className='h-8 w-8 animate-spin text-blue-500' />
+        </div>
       ) : (
-        chats.map(({ chatRoomId, user, offeredSkill, requestedSkill }) => (
-          <div
-            className='cursor-pointer pb-4 border-b'
-            key={chatRoomId}
-            onClick={() =>
-              onSelect({ chatRoomId, user, offeredSkill, requestedSkill })
-            }
-          >
-            <div className='flex items-center cursor-pointer gap-4 pb-4'>
-              <div className='w-8 h-8 bg-[#ddd] rounded-full flex items-center justify-center text-sm text-[#555] font-semibold'>
-                {user.name.split(' ')[0]?.[0]?.toUpperCase()}
+        chats?.map((chat) => {
+          // FIX: Access 'otherUser' instead of 'user' to match Backend & IChat type
+          const { chatRoomId, otherUser, offeredSkill, requestedSkill } = chat;
+          
+          return (
+            <div
+              className='cursor-pointer p-3 hover:bg-gray-50 rounded-lg border-b transition-colors'
+              key={chat.chatRoomId}
+              onClick={() => onSelect(chat)}
+            >
+              <div className='flex items-center gap-4 pb-2'>
+                {/* User Avatar Placeholder */}
+                <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-sm text-blue-600 font-bold'>
+                  {chat.otherUser.fullName ? chat.otherUser.fullName.charAt(0).toUpperCase() : '?'}
+                </div>
+                
+                <div className="flex flex-col">
+                  <span className='text-sm font-bold text-gray-800'>
+                    {chat.otherUser.fullName || 'Unknown User'}
+                  </span>
+                  <span className="text-[10px] text-gray-500 uppercase tracking-wider">
+                    Skill Exchange
+                  </span>
+                </div>
               </div>
-              <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>
-                {user.name}
-              </span>
-            </div>
 
-            <div className='flex  justify-between px-1 gap-1'>
-              <div className='truncate whitespace-nowrap overflow-hidden text-ellipsis flex-1'>
-                {offeredSkill}
-              </div>{' '}
-              ↔{' '}
-              <div className='truncate whitespace-nowrap overflow-hidden text-ellipsis flex-1 text-right'>
-                {requestedSkill}
+              {/* Skills Display */}
+              <div className='flex justify-between items-center px-1 text-xs text-gray-600 italic bg-gray-50 p-2 rounded'>
+                <div className='truncate max-w-[80px]' title={offeredSkill}>
+                  {offeredSkill}
+                </div>
+                <span className="text-blue-400">↔</span>
+                <div className='truncate max-w-[80px] text-right' title={requestedSkill}>
+                  {requestedSkill}
+                </div>
               </div>
             </div>
-          </div>
-        ))
+          );
+        })
+      )}
+
+      {!loading && chats?.length === 0 && (
+        <p className="text-center text-gray-400 mt-10 text-sm">No conversations yet.</p>
       )}
     </div>
   );

@@ -16,167 +16,190 @@ export default function ChatRoom({
   updateChats,
 }: {
   chat: IChat;
-  updateChats: any;
+  updateChats: (chatRoomId: string) => void;
 }) {
-  const { user, chatRoomId, offeredSkill, requestedSkill } = chat;
+  /** * 1. UNIVERSAL ID HANDLING
+   * Backend might send 'id', 'chatroomId', or 'chatRoomId'.
+   * This logic ensures we always have a valid Room ID.
+   */
+  const actualRoomId = chat.chatRoomId || (chat as any).chatroomId || (chat as any).id;
+  const { otherUser, offeredSkill, requestedSkill } = chat;
   const currentUser = useUser().user;
+
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState('');
 
-  const containerRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const clientRef = useRef<Client | null>(null);
 
+  // Auto-scroll to the latest message whenever the messages array updates
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [messages]);
 
+  /**
+   * 2. REST API: FETCH MESSAGE HISTORY
+   * Fetches existing messages from MongoDB using the actualRoomId.
+   */
   useEffect(() => {
-    (async () => {
+    const fetchMessages = async () => {
+      if (!actualRoomId) return;
       try {
         setLoading(true);
-        const res = await getChat(chatRoomId);
-
-        if (!res.success) {
-          setLoading(false);
-          return toast.error(res.message);
+        const res = await getChat(actualRoomId);
+        if (res.success) {
+          setMessages(res.data);
+        } else {
+          toast.error(res.message);
         }
-
-        setLoading(false);
-        setMessages(res.data);
       } catch (err) {
-        console.log(err);
-        toast.error('something went wrong. unable to fetch messages');
+        console.error("API Fetch Error:", err);
+      } finally {
         setLoading(false);
       }
-    })();
-  }, [chat.chatRoomId]);
+    };
+    fetchMessages();
+  }, [actualRoomId]);
 
-  const clientRef = useRef<any>(null);
-
+  /**
+   * 3. WEBSOCKET: REAL-TIME MESSAGING
+   * Connects to the server and subscribes to the specific room's topic.
+   */
   useEffect(() => {
+    if (!actualRoomId) return;
+
     const stompClient = new Client({
       webSocketFactory: () => new SockJS(WEBSOCKET_URL),
-      debug: str => {
-        console.log(str);
-      },
       reconnectDelay: 5000,
-    });
+      onConnect: () => {
+        console.log('STOMP: Connected to Room:', actualRoomId);
 
-    stompClient.onConnect = () => {
-      stompClient.subscribe(`/topic/messages/${chatRoomId}`, message => {
-        const receivedMessage = JSON.parse(message.body);
-        setMessages(prev => [...prev, receivedMessage]);
-        updateChats(chatRoomId);
-      });
-    };
+        // Listen for incoming messages on the specific room topic
+        stompClient.subscribe(`/topic/room/${actualRoomId}`, (payload) => {
+          const receivedMessage = JSON.parse(payload.body);
+
+          setMessages((prev) => {
+            // Prevent duplicate messages in the UI
+            if (prev.find((m) => m.id === receivedMessage.id)) return prev;
+            return [...prev, receivedMessage];
+          });
+
+          // Updates the order of chats in the sidebar
+          updateChats(actualRoomId);
+        });
+      },
+    });
 
     stompClient.activate();
     clientRef.current = stompClient;
 
+    /** * CLEANUP: Close the socket when component unmounts or room changes.
+     * Prevents "WebSocket is closed before established" errors.
+     */
     return () => {
-      stompClient.deactivate();
+      if (stompClient.active) {
+        stompClient.deactivate();
+      }
     };
-  }, [chatRoomId]);
+  }, [actualRoomId, updateChats]);
 
-  // Function to send message
-  const sendMessage = (message: string) => {
-    if (message === '') return;
+  /**
+   * 4. SEND MESSAGE FUNCTION
+   * Publishes the message to the backend via the STOMP client.
+   */
+  const handleSendMessage = () => {
+    if (newMessage.trim() === '' || !actualRoomId) return;
 
-    if (clientRef.current && clientRef.current.connected) {
-      const msg = {
+    if (clientRef.current?.connected) {
+      const msgPayload = {
         senderId: currentUser.id,
-        receiverId: user.id,
-        message,
-        chatRoomId,
+        receiverId: otherUser.id,
+        content: newMessage, // Matches 'content' field in Backend Entity
+        chatRoomId: actualRoomId,
       };
 
       clientRef.current.publish({
-        destination: '/app/chat.sendMessage',
-        body: JSON.stringify(msg),
+        destination: '/app/chat.send', // Backend @MessageMapping("/chat.send")
+        body: JSON.stringify(msgPayload),
       });
+
       setNewMessage('');
+    } else {
+      toast.error("Connecting to server...");
     }
   };
 
-  useEffect(() => {
-    if (messages.length === 0) return;
-
-    const last_message_timestamp = messages[messages.length - 1].createdAt;
-
-    localStorage.setItem(chatRoomId, last_message_timestamp);
-  }, [messages]);
-
   return (
-    <div className='flex flex-1 flex-col'>
-      <div className='p-5 border-b-[1px] border-[#ddd] border-solid flex justify-between items-center bg-white'>
+    <div className='flex flex-1 flex-col h-full bg-white'>
+      {/* Header with User Info */}
+      <div className='p-5 border-b border-gray-200 flex justify-between items-center bg-white'>
         <div>
-          <h2>Chat with {user.name}</h2>
-          <h3>
-            You learn
-            <span className='font-semibold'> {requestedSkill} </span>
-            and teach <span className='font-semibold'>{offeredSkill}</span>
-          </h3>
+          <h2 className='text-lg font-bold'>Chat with {otherUser?.fullName}</h2>
+          <p className='text-sm text-gray-500'>
+            Learning <span className='font-semibold text-blue-600'>{requestedSkill}</span> |
+            Teaching <span className='font-semibold text-green-600'>{offeredSkill}</span>
+          </p>
         </div>
-        <button className='px-5 py-2 bg-[#3b82f6] text-white border-none rounded-sm cursor-pointer'>
-          Start Video Call
-        </button>
       </div>
 
-      {/* Chat Messages */}
+      {/* Messages Scrollable Container */}
       <div
-        className='flex-1 p-5 flex flex-col gap-4 bg-[#f0f2f5] overflow-auto'
+        className='flex-1 p-5 flex flex-col gap-3 bg-gray-50 overflow-y-auto'
         ref={containerRef}
       >
         {loading ? (
-          <div className='flex h-full flex-col justify-end gap-4'>
-            <div className='rect skeleton-content bg-[#dbeafe]'></div>
-            <div className='rect skeleton-content self-end bg-[#d1fae5]'></div>
-            <div className='rect skeleton-content bg-[#dbeafe]'></div>
-            <div className='rect skeleton-content self-end bg-[#d1fae5]'></div>
-          </div>
+          <div className="text-center text-gray-400 mt-10">Syncing messages...</div>
         ) : (
-          messages.map(msg => (
-            <div
-              key={msg.id}
-              className='flex'
-              style={{
-                justifyContent:
-                  msg.senderId !== user.id ? 'flex-end' : 'flex-start',
-              }}
-            >
-              <div
-                className='px-4 py-2 rounded-[10px] text-base max-w-[60%]'
-                style={{
-                  backgroundColor:
-                    msg.senderId !== user.id ? '#d1fae5' : '#dbeafe',
-                }}
-              >
-                <div>{msg.message}</div>
+          // Inside messages.map in ChatRoom.tsx
+          messages.map((msg) => {
+            const isMe = msg.senderId === currentUser.id;
+            const textContent = (msg as any).content || (msg as any).message;
 
-                <div className='text-[10px] text-gray-600 text-right italic'>
-                  {formatTimeAgo(msg.createdAt)}
+            /**
+             * WHATSAPP STYLE TIME DISPLAY
+             * This calls our improved utility function.
+             */
+            const displayTime = () => {
+              if (!msg.createdAt) return 'Just now';
+
+              // Convert string timestamp to Date object first
+              const dateObj = new Date(msg.createdAt);
+
+              // Final check before sending to utility
+              return isNaN(dateObj.getTime()) ? 'Just now' : formatTimeAgo(dateObj);
+            };
+
+            return (
+              <div key={msg.id || Math.random()} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                <div className={`px-4 py-2 rounded-2xl max-w-[70%] shadow-sm ${isMe ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white text-gray-800 border'
+                  }`}>
+                  <p className='text-sm leading-relaxed'>{textContent}</p>
+                  <p className={`text-[10px] mt-1 text-right opacity-70`}>
+                    {displayTime()}
+                  </p>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
-      <div className='flex p-4 border-t-[1px] border-[#ddd] bg-white'>
+      {/* Message Input Bar */}
+      <div className='p-4 border-t border-gray-200 bg-white flex gap-2'>
         <input
           type='text'
-          placeholder='Type your message...'
+          placeholder='Type a message...'
           value={newMessage}
-          onChange={({ target }) => setNewMessage(target.value)}
-          className='flex-1 p-2 border-[1px] border-[#ccc] rounded-sm mr-2'
+          onChange={(e) => setNewMessage(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+          className='flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
         />
         <button
-          onClick={() => {
-            sendMessage(newMessage);
-          }}
-          className='px-5 py-2 bg-[#3b82f6] border-none text-white cursor-pointer rounded-sm'
+          onClick={handleSendMessage}
+          className='px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-all active:scale-95'
         >
           Send
         </button>

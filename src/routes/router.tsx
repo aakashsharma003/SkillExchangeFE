@@ -18,7 +18,7 @@ import Chat from '@/views/Chat/Chat.tsx';
 import EditProfile from '@/views/EditProfile/EditProfile.tsx';
 import appRoutes from './appRoutes.ts';
 import Dashboard from '@/views/Dashboard/Dashboard.tsx';
-import SkillexchangeRequests from '@/views/SkillSwapRequests/SkillSwapRequests.tsx';
+import SkillexchangeRequests from '@/views/SkillExchangeRequests/SkillExchangeRequests.tsx';
 import Profile from '@/views/Profile/Profile.tsx';
 import Certifications from '@/views/Certifications/Certifications.tsx';
 import SkillChallenges from '@/views/SkillChallenges/SkillChallenges.tsx';

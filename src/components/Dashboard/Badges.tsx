@@ -28,7 +28,7 @@ export default function Badges() {
             key={idx}
             className={`px-4 py-2 rounded ${badge.color} ${badge.textColor} font-semibold text-sm`}
           >
-            {badge.name}
+            {badge.fullName}
           </div>
         ))}
       </div>

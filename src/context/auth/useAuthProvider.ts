@@ -9,17 +9,19 @@ const useAuthProvider = () => {
 
   const fetchUser = async () => {
     try {
+      console.log("hii here aim ")
       const res = await getUserProfile();
-
+      console.log("response",res);
       if (!res.success) {
         toast.error(res.message);
         return logout();
       }
-
+      
       setUser(res.data);
     } catch (error: any) {
+      console.log("this is the error occured",error)
       toast.error('something went wrong. failed to fetch user profile.');
-      logout();
+      // logout();
     }
   };
 

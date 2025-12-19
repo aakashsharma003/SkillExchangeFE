@@ -31,8 +31,9 @@ const Login = () => {
         return toast.error(response.message);
       }
 
-      localStorage.setItem('token', response.data);
+      localStorage.setItem('token', response.data.token);
       await fetchUser();
+      console.log("i am reached here")
       navigate(appRoutes.dashboard);
       setLoading(false);
     } catch (err) {

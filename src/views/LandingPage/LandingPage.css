@@ -1,0 +1,11 @@
+.container {
+  margin: 0 auto;
+  padding: 0 1rem;
+  max-width: 1280px;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding: 0 2rem;
+  }
+}

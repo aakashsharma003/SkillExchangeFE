@@ -26,13 +26,13 @@ export default function SentReqCard({ req }: { req: IexchangeRequest }) {
             navigate(appRoutes.userProfile, { state: receiver.email })
           }
         >
-          {receiver.name.split(' ')[0]?.[0]?.toUpperCase()}
+          {receiver.fullName.split(' ')[0]?.[0]?.toUpperCase()}
         </div>
 
         <div>
-          <h2 className='font-bold'>{receiver.name}</h2>
+          <h2 className='font-bold'>{receiver.fullName}</h2>
           <p className='mb-1 color-[#666] text-xs'>📧 {receiver.email}</p>
-          <p className='mb-2 color-[#666] text-xs'>📞 {receiver.contact}</p>
+          <p className='mb-2 color-[#666] text-xs'>📞 {receiver.phone}</p>
         </div>
       </div>
 

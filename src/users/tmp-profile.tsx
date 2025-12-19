@@ -100,7 +100,7 @@ const tmppage: React.FC = () => {
           alt='Profile'
           className='w-36 h-36 rounded-full mb-4'
         />
-        <h1 className='text-2xl font-bold'>{profile.name}</h1>
+        <h1 className='text-2xl font-bold'>{profile.fullName}</h1>
         <p className='text-gray-600'>{profile.bio}</p>
         <p className='mt-4 text-gray-700'>{profile.description}</p>
       </div>
@@ -150,7 +150,7 @@ const tmppage: React.FC = () => {
               key={idx}
               className={`px-4 py-2 rounded ${badge.color} ${badge.textColor} font-semibold text-sm`}
             >
-              {badge.name}
+              {badge.fullName}
             </div>
           ))}
         </div>
