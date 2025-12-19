@@ -15,13 +15,13 @@ const Signup = () => {
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<ISignUp>({
-    name: '',
+    fullName: '',
     email: '',
-    contact: '',
+    phone: '',
     skills: [],
     password: '',
   });
-  const { name, email, contact, skills, password } = formData;
+  const { fullName, email, phone, skills, password } = formData;
 
   const setFormValue = (label: string, value: string) =>
     setFormData({ ...formData, [label]: value });
@@ -36,9 +36,9 @@ const Signup = () => {
     });
 
   const handleSignup = async () => {
-    if (name === '' || email === '' || password === '' || contact === '')
+    if (fullName === '' || email === '' || password === '' || phone === '')
       return toast.error('Please fill in all the details');
-    if (contact.length !== 10)
+    if (phone.length !== 10)
       return toast.error('Please enter a valid contact number');
     if (password.length < 8)
       return toast.error('password length must be at least 8');
@@ -88,7 +88,7 @@ const Signup = () => {
             <Input
               label='Contact Number'
               placeholder='Enter your contact number'
-              value={contact}
+              value={phone}
               onChange={(value: string) =>
                 setFormValue('contact', value.replace(/\D/g, ''))
               }

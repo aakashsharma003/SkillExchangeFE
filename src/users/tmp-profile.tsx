@@ -12,7 +12,7 @@ interface Badge {
 }
 
 interface UserProfile {
-  name: string;
+  fullName: string;  // Changed from 'name' to 'fullName' to match your JSX
   photoUrl: string;
   bio: string;
   description: string;
@@ -30,7 +30,7 @@ const tmppage: React.FC = () => {
     // Simulating API call
     const fetchProfile = async () => {
       const data: UserProfile = {
-        name: 'John Doe',
+        fullName: 'John Doe',
         photoUrl: 'https://via.placeholder.com/150',
         bio: 'Creative Designer & Web Developer',
         description:
@@ -150,7 +150,7 @@ const tmppage: React.FC = () => {
               key={idx}
               className={`px-4 py-2 rounded ${badge.color} ${badge.textColor} font-semibold text-sm`}
             >
-              {badge.fullName}
+              {badge.name}
             </div>
           ))}
         </div>

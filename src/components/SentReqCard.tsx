@@ -6,14 +6,14 @@ import appRoutes from '@/routes/appRoutes';
 export default function SentReqCard({ req }: { req: IexchangeRequest }) {
   const navigate = useNavigate();
   const {
-    receiverDetails: receiver,
-    request: { message, status, requestedSkill, offeredSkill },
+    receiver,
+    message, status, requestedSkill, offeredSkill 
   } = req;
 
   const bgClass =
-    status === 'Pending'
+    status === 'PENDING'
       ? 'bg-yellow-400'
-      : status === 'Accepted'
+      : status === 'ACCEPTED'
         ? 'bg-green-400'
         : 'bg-red-400';
 
@@ -43,7 +43,7 @@ export default function SentReqCard({ req }: { req: IexchangeRequest }) {
         {requestedSkill}
       </div>
 
-      {status === 'Accepted' && (
+      {status === 'ACCEPTED' && (
         <div className='text-left text-sm'>
           <span className=' font-semibold text-base'>
             Skill he want to learn:{' '}
