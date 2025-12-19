@@ -21,7 +21,7 @@ const useAuthProvider = () => {
     } catch (error: any) {
       console.log("this is the error occured",error)
       toast.error('something went wrong. failed to fetch user profile.');
-      // logout();
+      logout();
     }
   };
 

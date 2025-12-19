@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useTheme } from "@/hooks/use-theme"
-import { useNavigate } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom"; 
 import "./LandingPage.css"
 
 const LandingPage = () => {
@@ -49,9 +49,6 @@ const LandingPage = () => {
   }
   const handleSignUp = () => {
     navigate("/signup"); // Ensure this matches your route path
-  };
-  const handleLogin = () => {
-    navigate("/login"); // Ensure this matches your route path
   };
   const container = {
     hidden: { opacity: 0 },
@@ -144,9 +141,9 @@ const LandingPage = () => {
               {mounted && theme === "dark" ? <Sun className="size-[18px]" /> : <Moon className="size-[18px]" />}
               <span className="sr-only">Toggle theme</span>
             </Button>
-            <a href={"/login"} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+            <Link to={"/login"} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
               Log in
-            </a>
+            </Link>
             <Button className="rounded-full" onClick={handleSignUp}>
               Get Started
               <ChevronRight className="ml-1 size-4" />
@@ -184,9 +181,9 @@ const LandingPage = () => {
                 FAQ
               </a>
               <div className="flex flex-col gap-2 pt-2 border-t">
-                <a href={"/login"} className="py-2 text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
+                <Link to={"/login"} className="py-2 text-sm font-medium" onClick={() => setMobileMenuOpen(false)}>
                   Log in
-                </a>
+                </Link>
                 <Button className="rounded-full" onClick={handleSignUp}>
                   Get Started
                   <ChevronRight className="ml-1 size-4" />
