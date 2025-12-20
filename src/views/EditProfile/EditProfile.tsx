@@ -1,149 +1,167 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useUser } from '@/context/auth/useUser';
-import Input from '@/components/Auth/Input';
-import SkillInput from '@/components/SkillInput';
-import { Button } from '@/components/ui/button';
-import toast from 'react-hot-toast';
-import Spinner from '@/components/ui/Spinner';
-import { updateDetails } from '@/api/user';
-import appRoutes from '@/routes/appRoutes';
-import { IUpdateUser } from '@/types/user';
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useUser } from "@/context/auth/useUser"
+import Sidebar from "@/components/Dashboard/SideBar"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
+import toast from "react-hot-toast"
+import Spinner from "@/components/ui/Spinner"
+import { updateDetails } from "@/api/user"
+import appRoutes from "@/routes/appRoutes"
+import type { IUpdateUser } from "@/types/user"
 
-const EditProfile = () => {
-  const navigate = useNavigate();
+export default function EditProfile() {
+  const navigate = useNavigate()
   const {
     user: { email, ...rest },
     fetchUser,
-  } = useUser();
-  const [formData, setFormData] = useState<IUpdateUser>(rest);
+  } = useUser()
+  const [formData, setFormData] = useState<IUpdateUser>(rest)
+  const [loading, setLoading] = useState(false)
+
   const setFormValue = (label: string, value: string) => {
-    setFormData(prev => ({ ...prev, [label]: value }));
-  };
-  const addSkill = (skill: string) =>
-    setFormData({ ...formData, skills: [...formData.skills, skill] });
+    setFormData((prev) => ({ ...prev, [label]: value }))
+  }
+
+  const addSkill = (skill: string) => setFormData({ ...formData, skills: [...formData.skills, skill] })
 
   const removeSkill = (skill: string) =>
     setFormData({
       ...formData,
-      skills: formData.skills.filter(val => skill !== val),
-    });
-
-  const [loading, setLoading] = useState(false);
+      skills: formData.skills.filter((val) => skill !== val),
+    })
 
   const handleUpdate = async () => {
-    if (formData.fullName === '' || formData.phone === '')
-      return toast.error('Please fill in valid details');
+    if (formData.fullName === "" || formData.phone === "") return toast.error("Please fill in valid details")
 
     try {
-      setLoading(true);
-      const res = await updateDetails(formData);
+      setLoading(true)
+      const res = await updateDetails(formData)
 
       if (!res.success) {
-        setLoading(false);
-        return toast.error(res.message);
+        setLoading(false)
+        return toast.error(res.message)
       }
 
-      await fetchUser();
-      setLoading(false);
-      toast.success('Profile updated successfully!');
-      navigate(appRoutes.dashboard);
+      await fetchUser()
+      setLoading(false)
+      toast.success("Profile updated successfully!")
+      navigate(appRoutes.dashboard)
     } catch (err) {
-      setLoading(false);
-      console.error('Error updating profile:', err);
-      toast.error('something went wrong');
+      setLoading(false)
+      console.error("Error updating profile:", err)
+      toast.error("something went wrong")
     }
-  };
+  }
+
+  const handleLogout = () => {
+    // Handle logout
+    navigate("/login")
+  }
 
   return (
-    <div className='min-h-screen pb-12'>
+    <div className="flex min-h-screen bg-background">
       {loading && <Spinner />}
+      <Sidebar onLogout={handleLogout} />
 
-      <div className='bg-white p-8 w-full gap-4 flex flex-col'>
-        <h2 className='text-2xl font-bold text-center'>Update Profile</h2>
+      <main className="flex-1 lg:ml-64 ml-20 p-4 md:p-6 lg:p-8">
+        <div className="max-w-2xl">
+          <div className="mb-6 md:mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Edit Profile</h1>
+            <p className="mt-2 text-sm md:text-base text-muted-foreground">Update your profile information</p>
+          </div>
 
-        <Input
-          label='Name'
-          placeholder='Enter your name'
-          value={formData.fullName}
-          onChange={(val: string) => {
-            setFormValue('name', val);
-          }}
-        />
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  value={formData.fullName}
+                  onChange={(e) => setFormValue("fullName", e.target.value)}
+                  placeholder="Your name"
+                />
+              </div>
 
-        <Input
-          label='Email'
-          placeholder='Enter your email'
-          value={email}
-          props={{ disabled: true }}
-        />
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" value={email} disabled placeholder="Your email" />
+              </div>
 
-        <Input
-          label='Contact Number'
-          placeholder='Enter your contact number'
-          value={formData.phone}
-          onChange={(value: string) =>
-            setFormValue('contact', value.replace(/\D/g, ''))
-          }
-          props={{ maxLength: 10 }}
-        />
+              <div className="space-y-2">
+                <Label htmlFor="phone">Contact Number</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => setFormValue("phone", e.target.value.replace(/\D/g, ""))}
+                  placeholder="Your contact number"
+                  maxLength={10}
+                />
+              </div>
 
-        <SkillInput
-          skills={formData.skills}
-          addSkill={addSkill}
-          removeSkill={removeSkill}
-        />
+              <div className="space-y-2">
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea
+                  id="bio"
+                  value={formData.bio ?? ""}
+                  onChange={(e) => setFormValue("bio", e.target.value)}
+                  placeholder="Tell us about yourself..."
+                  rows={4}
+                />
+              </div>
 
-        <Input
-          label='Bio'
-          placeholder='Enter something about yourself'
-          value={formData.bio}
-          onChange={(value: string) => setFormValue('bio', value)}
-        />
+              <div className="space-y-2">
+                <Label htmlFor="location">Location</Label>
+                <Input
+                  id="location"
+                  value={formData.location ?? ""}
+                  onChange={(e) => setFormValue("location", e.target.value)}
+                  placeholder="Your location"
+                />
+              </div>
 
-        <Input
-          label='Location'
-          placeholder='Enter your location'
-          value={formData.location}
-          onChange={(value: string) => setFormValue('location', value)}
-        />
+              <div className="space-y-2">
+                <Label htmlFor="linkedin">LinkedIn URL</Label>
+                <Input
+                  id="linkedin"
+                  value={formData.linkedinLink ?? ""}
+                  onChange={(e) => setFormValue("linkedinLink", e.target.value)}
+                  placeholder="Your LinkedIn URL"
+                />
+              </div>
 
-        <Input
-          label='Linkedin URL'
-          placeholder='Enter your linkedin url'
-          value={formData.linkedinLink}
-          onChange={(value: string) => setFormValue('linkedinLink', value)}
-        />
+              <div className="space-y-2">
+                <Label htmlFor="github">GitHub URL</Label>
+                <Input
+                  id="github"
+                 value={formData.githubLink ?? ""}
+                  onChange={(e) => setFormValue("githubLink", e.target.value)}
+                  placeholder="Your GitHub URL"
+                />
+              </div>
 
-        <Input
-          label='Github URL'
-          placeholder='Enter your github url'
-          value={formData.githubLink}
-          onChange={(value: string) => setFormValue('githubLink', value)}
-        />
-
-        <Input
-          label='Youtube URL'
-          placeholder='Enter your youtube url'
-          value={formData.youtubeLink}
-          onChange={(value: string) => setFormValue('youtubeLink', value)}
-        />
-
-        <Input
-          label='Instagram URL'
-          placeholder='Enter your instagram url'
-          value={formData.instagramLink}
-          onChange={(value: string) => setFormValue('instagramLink', value)}
-        />
-      </div>
-
-      <div className='fixed  bottom-0 w-full p-4 flex justify-center items-center bg-white'>
-        <Button className='cursor-pointer px-8' onClick={handleUpdate}>
-          Update Profile
-        </Button>
-      </div>
+              <div className="flex gap-4 pt-4">
+                <Button onClick={handleUpdate} className="flex-1" disabled={loading}>
+                  {loading ? "Updating..." : "Save Changes"}
+                </Button>
+                <Button variant="outline" onClick={() => navigate(appRoutes.dashboard)} className="flex-1">
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
     </div>
-  );
-};
+  )
+}
 
-export default EditProfile;
+
+
+

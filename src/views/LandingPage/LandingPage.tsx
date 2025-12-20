@@ -48,7 +48,7 @@ const LandingPage = () => {
     setTheme(theme === "dark" ? "light" : "dark")
   }
   const handleSignUp = () => {
-    navigate("/signup"); // Ensure this matches your route path
+    navigate("/signup"); 
   };
   const container = {
     hidden: { opacity: 0 },

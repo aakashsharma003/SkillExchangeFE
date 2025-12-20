@@ -1,8 +1,6 @@
-import { useUser } from '@/context/auth/useUser';
 import SideBar from '@/components/Dashboard/SideBar';
 import SkillsOffered from '@/components/Dashboard/SkillsOffered';
 import ProfileHeader from '@/components/Dashboard/ProfileHeader';
-import SuggestedExchange from '@/components/Dashboard/SuggestedExchange';
 import ProgressTracker from '@/components/Dashboard/ProgressTracker';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -15,7 +13,7 @@ import Badges from '@/components/Dashboard/Badges';
 import SessionHistory from '@/components/Dashboard/SessionHistory';
 import UserReviews from '@/components/Dashboard/UserReviews';
 
-const Profile = () => {
+export default function Profile(){
   const location = useLocation();
   const navigate = useNavigate();
   const email = location.state;
@@ -74,5 +72,3 @@ const Profile = () => {
     </div>
   );
 };
-
-export default Profile;
