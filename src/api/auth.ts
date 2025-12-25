@@ -1,6 +1,7 @@
 import { ILogin, ISignUp } from '@/types/user';
 import axios from 'axios';
-export const BASE_URL = 'http://localhost:8080/api';
+export const BASE_URL = import.meta.env.VITE_APP_BASE_URL + "/api";
+// console.log("Backend URL is:", BASE_URL);
 
 // Reusable Axios instance
 export const api = axios.create({

@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useTheme } from "@/hooks/use-theme"
 import { Link, useNavigate } from "react-router-dom"; 
 import "./LandingPage.css"
+import { MobileMockup } from "@/components/LandingPage/MobileMockup"
 
 const LandingPage = () => {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -246,9 +247,9 @@ const LandingPage = () => {
               transition={{ duration: 0.7, delay: 0.2 }}
               className="relative mx-auto max-w-5xl"
             >
-              <div className="rounded-xl overflow-hidden shadow-2xl border border-border/40 bg-gradient-to-b from-background to-muted/20">
+             <div className="hidden md:block rounded-xl overflow-hidden shadow-2xl border border-border/40 bg-gradient-to-b from-background to-muted/20">
                 <img
-                  src="/image.png"
+                  src="/image-desktop.png"
                   width={1280}
                   height={720}
                   alt="SkillExchange dashboard"
@@ -256,6 +257,13 @@ const LandingPage = () => {
                 />
                 <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/10 dark:ring-white/10"></div>
               </div>
+
+              {/* Mobile Mockup (Visible on small screens only) */}
+              <div className="block md:hidden">
+                <MobileMockup imageUrl="/image.png" />
+              </div>
+
+              {/* Decorative Background Glows */}
               <div className="absolute -bottom-6 -right-6 -z-10 h-[300px] w-[300px] rounded-full bg-gradient-to-br from-primary/30 to-accent/30 blur-3xl opacity-70"></div>
               <div className="absolute -top-6 -left-6 -z-10 h-[300px] w-[300px] rounded-full bg-gradient-to-br from-accent/30 to-primary/30 blur-3xl opacity-70"></div>
             </motion.div>
