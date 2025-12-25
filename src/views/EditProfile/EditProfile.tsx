@@ -57,15 +57,15 @@ export default function EditProfile() {
     }
   }
 
-  const handleLogout = () => {
-    // Handle logout
-    navigate("/login")
-  }
+    const handleNavigate = (href: string) => {
+    navigate(href);
+    console.log(`Navigating to: ${href}`);
+    };
 
   return (
     <div className="flex min-h-screen bg-background">
       {loading && <Spinner />}
-      <Sidebar onLogout={handleLogout} />
+      <Sidebar onNavigate={handleNavigate} />
 
       <main className="flex-1 lg:ml-64 ml-20 p-4 md:p-6 lg:p-8">
         <div className="max-w-2xl">
