@@ -24,6 +24,7 @@ import { useTheme } from "@/hooks/use-theme"
 import { Link, useNavigate } from "react-router-dom"; 
 import "./LandingPage.css"
 import { MobileMockup } from "@/components/LandingPage/MobileMockup"
+import SealLogo from "@/components/LandingPage/SealLogo"
 
 const LandingPage = () => {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -107,9 +108,7 @@ const LandingPage = () => {
       >
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2 font-bold">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground">
-              SE
-            </div>
+            <SealLogo/>
             <span>SkillExchange</span>
           </div>
           <nav className="hidden md:flex gap-8">
@@ -816,9 +815,7 @@ const LandingPage = () => {
           <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
             <div className="space-y-4">
               <div className="flex items-center gap-2 font-bold">
-                <div className="size-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground">
-                  SE
-                </div>
+                 <SealLogo />
                 <span>SkillExchange</span>
               </div>
               <p className="text-sm text-muted-foreground">
