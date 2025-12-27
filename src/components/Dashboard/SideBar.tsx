@@ -9,7 +9,7 @@ interface NavigationItem {
 
 const navigation: NavigationItem[] = [
   { name: "Home", href: "/dashboard", icon: Home },
-  { name: "My Requests", href: "/requests", icon: Users },
+  { name: "My Requests", href: "/skill-exchange-requests", icon: Users },
   { name: "Find Skills", href: "/find-skills", icon: Search },
   { name: "Chats", href: "/chats", icon: MessageSquare },
   { name: "Notifications", href: "/notifications", icon: Bell },

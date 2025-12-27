@@ -1,137 +1,200 @@
-import { fetchReceivedRequests, fetchSentRequests } from '@/api/exchange-request';
-import ReceivedReqCard from '@/components/ReceivedReqCard';
-import SentReqCard from '@/components/SentReqCard';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { IexchangeRequest } from '@/types/swal-request';
-import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { fetchReceivedRequests, fetchSentRequests, acceptRequest, rejectRequest } from '@/api/exchange-request';
+import { IexchangeRequest } from '@/types/swal-request';
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Check, X, Clock, Loader2, MessageSquare } from "lucide-react";
 import toast from 'react-hot-toast';
+import Sidebar from '@/components/Dashboard/SideBar';
+import { useNavigate } from 'react-router-dom';
 
 const SkillExchangeRequests = () => {
+  const navigate = useNavigate();
   const [sent, setSent] = useState<IexchangeRequest[]>([]);
-  const [filteredSent, setFilteredSent] = useState<IexchangeRequest[]>([]);
-  const [sentLoading, setSentLoading] = useState(false);
-
   const [received, setReceived] = useState<IexchangeRequest[]>([]);
-  const [filteredReceived, setFilteredReceived] = useState<IexchangeRequest[]>([]);
-  const [receivedLoading, setReceivedLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
 
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const filters = ['PENDING', 'ACCEPTED', 'REJECTED'];
+  const loadAllRequests = async () => {
+    try {
+      setLoading(true);
+      const [sentRes, receivedRes] = await Promise.all([
+        fetchSentRequests(),
+        fetchReceivedRequests(),
+      ]);
+
+      if (sentRes.success) setSent(sentRes.data);
+      if (receivedRes.success) setReceived(receivedRes.data);
+    } catch (err) {
+      toast.error('Failed to load requests');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadAllRequests = async () => {
-      try {
-        setSentLoading(true);
-        setReceivedLoading(true);
-
-        // Fetching both simultaneously
-        const [sentRes, receivedRes] = await Promise.all([
-          fetchSentRequests(),
-          fetchReceivedRequests(),
-        ]);
-
-        if (sentRes.success) setSent(sentRes.data);
-        if (receivedRes.success) setReceived(receivedRes.data);
-
-      } catch (err) {
-        toast.error('Failed to load requests');
-        console.error(err);
-      } finally {
-        setSentLoading(false);
-        setReceivedLoading(false);
-      }
-    };
-
     loadAllRequests();
   }, []);
 
-  // Update logic: No more .request.id, directly use .id
-  const handleActionUpdate = (updatedReq: IexchangeRequest) => {
-    setReceived(prev =>
-      prev.map(item => (item.id !== updatedReq.id ? item : updatedReq))
-    );
+  const onAccept = async (id: string, skill: string) => {
+    try {
+      setIsProcessing(id);
+      const res = await acceptRequest(id, skill);
+      if (res.success) {
+        toast.success('Request Accepted');
+        await loadAllRequests(); // Refresh data to update status and open chat
+      }
+    } catch (err) {
+      toast.error('Failed to accept');
+    } finally {
+      setIsProcessing(null);
+    }
   };
 
-  const onToggleFilter = (filter: string) => {
-    setSelectedFilters(prev =>
-      prev.includes(filter)
-        ? prev.filter(f => f !== filter)
-        : [...prev, filter]
-    );
+  const onReject = async (id: string) => {
+    try {
+      setIsProcessing(id);
+      const res = await rejectRequest(id);
+      if (res.success) {
+        toast.success('Request Rejected');
+        await loadAllRequests();
+      }
+    } catch (err) {
+      toast.error('Failed to reject');
+    } finally {
+      setIsProcessing(null);
+    }
   };
 
-  // Sync filtered lists whenever source data or filters change
-  useEffect(() => {
-    const applyFilter = (list: IexchangeRequest[]) =>
-      list.filter(req => 
-        selectedFilters.length === 0 || selectedFilters.includes(req.status)
-      );
-
-    setFilteredSent(applyFilter(sent));
-    setFilteredReceived(applyFilter(received));
-  }, [selectedFilters, sent, received]);
-
-  return (
-    <div className='max-w-2xl mx-auto p-6'>
-      <h1 className='text-center text-5xl font-bold mb-8'>SkillExchange Requests</h1>
-
-      <Tabs defaultValue='received' className='w-full'>
-        <TabsList className='grid grid-cols-2 mb-6 h-14 w-full'>
-          <TabsTrigger value='received' className='text-xl cursor-pointer'>Received</TabsTrigger>
-          <TabsTrigger value='sent' className='text-xl cursor-pointer'>Sent</TabsTrigger>
-        </TabsList>
-
-        {/* --- Filter Section --- */}
-        <div className='flex gap-4 px-2 pb-6 items-center border-b mb-6'>
-          <span className="font-semibold">Filter Status:</span>
-          <div className='flex gap-4'>
-            {filters.map(filter => (
-              <div className='flex gap-2 items-center' key={filter}>
-                <input
-                  type='checkbox'
-                  id={`filter-${filter}`}
-                  className="cursor-pointer"
-                  checked={selectedFilters.includes(filter)}
-                  onChange={() => onToggleFilter(filter)}
-                />
-                <Label htmlFor={`filter-${filter}`} className="cursor-pointer">{filter}</Label>
-              </div>
-            ))}
+  // Helper function to render Request Cards
+  const RequestCard = ({ req, type }: { req: IexchangeRequest, type: 'sent' | 'received' }) => (
+    <Card key={req.id}>
+      <CardContent className="flex items-center justify-between pt-6">
+        <div className="flex items-center gap-4">
+          <Avatar className="h-12 w-12">
+            <AvatarFallback>{type === 'received' ? req.sender.fullName?.charAt(0) : req.receiver.fullName?.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="font-semibold">
+              {type === 'received' ? req.sender.fullName : req.receiver.fullName}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {type === 'received' ? "Wants to learn" : "You requested"}: {req.requestedSkill}
+            </p>
+            <div className="mt-1 flex items-center gap-2">
+              <Badge variant="outline" className={`gap-1 ${req.status === 'ACCEPTED' ? 'border-green-500 text-green-500' :
+                req.status === 'REJECTED' ? 'border-destructive text-destructive' : ''
+                }`}>
+                {req.status === 'PENDING' && <Clock className="h-3 w-3" />}
+                {req.status === 'ACCEPTED' && <Check className="h-3 w-3" />}
+                {req.status === 'REJECTED' && <X className="h-3 w-3" />}
+                {req.status}
+              </Badge>
+            </div>
           </div>
         </div>
 
-        {/* --- Received Content --- */}
-        <TabsContent value='received' className="space-y-4">
-          {receivedLoading ? (
-            <Loader2 className='h-10 w-10 animate-spin mx-auto' />
-          ) : filteredReceived.length === 0 ? (
-            <p className='text-center text-muted-foreground py-10'>No received requests matching filters.</p>
-          ) : (
-            filteredReceived.map(req => (
-              <ReceivedReqCard
-                key={req.id}
-                req={req}
-                onAction={handleActionUpdate}
-              />
-            ))
+        <div className="flex gap-2">
+          {type === 'received' && req.status === 'PENDING' && (
+            <>
+              <Button 
+                size="sm" 
+                disabled={isProcessing === req.id}
+                onClick={() => onAccept(req.id, req.requestedSkill)}
+              >
+                {isProcessing === req.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="mr-1 h-4 w-4" />} 
+                Accept
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                disabled={isProcessing === req.id}
+                onClick={() => onReject(req.id)}
+              >
+                <X className="mr-1 h-4 w-4" /> Decline
+              </Button>
+            </>
           )}
-        </TabsContent>
+          {req.status === 'ACCEPTED' && (
+            <Button size="sm" variant="outline" onClick={() => navigate('/chats')}>
+              <MessageSquare className="mr-1 h-4 w-4" /> Message
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
-        {/* --- Sent Content --- */}
-        <TabsContent value='sent' className="space-y-4">
-          {sentLoading ? (
-            <Loader2 className='h-10 w-10 animate-spin mx-auto' />
-          ) : filteredSent.length === 0 ? (
-            <p className='text-center text-muted-foreground py-10'>No sent requests found.</p>
-          ) : (
-            filteredSent.map(req => (
-              <SentReqCard key={req.id} req={req} />
-            ))
-          )}
-        </TabsContent>
-      </Tabs>
+  if (loading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Grouping logic for tabs
+  const allRequests = [...sent.map(r => ({ ...r, side: 'sent' })), ...received.map(r => ({ ...r, side: 'received' }))];
+  const pending = allRequests.filter(r => r.status === 'PENDING');
+  const accepted = allRequests.filter(r => r.status === 'ACCEPTED');
+  const rejected = allRequests.filter(r => r.status === 'REJECTED');
+  
+  const handleNavigate = (href: string) => {
+    navigate(href);
+  };
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-gray-100">
+      <Sidebar onNavigate={handleNavigate} />
+      <main className="flex-1 overflow-y-auto">
+        <div className="space-y-6 p-8 max-w-4xl mx-auto">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">My Requests</h1>
+            <p className="text-muted-foreground">Manage your skill exchange connections</p>
+          </div>
+
+          <Tabs defaultValue="pending" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="pending">
+                Pending
+                {pending.length > 0 && (
+                  <Badge variant="secondary" className="ml-2">{pending.length}</Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="accepted">Accepted</TabsTrigger>
+              <TabsTrigger value="rejected">Rejected</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="pending" className="space-y-4">
+              {pending.length === 0 ? (
+                <p className="text-center py-10 text-muted-foreground">No pending requests.</p>
+              ) : (
+                pending.map(req => <RequestCard key={req.id} req={req} type={req.side as any} />)
+              )}
+            </TabsContent>
+
+            <TabsContent value="accepted" className="space-y-4">
+              {accepted.length === 0 ? (
+                <p className="text-center py-10 text-muted-foreground">No accepted requests yet.</p>
+              ) : (
+                accepted.map(req => <RequestCard key={req.id} req={req} type={req.side as any} />)
+              )}
+            </TabsContent>
+
+            <TabsContent value="rejected" className="space-y-4">
+              {rejected.length === 0 ? (
+                <p className="text-center py-10 text-muted-foreground">No rejected requests.</p>
+              ) : (
+                rejected.map(req => <RequestCard key={req.id} req={req} type={req.side as any} />)
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
     </div>
   );
 };
