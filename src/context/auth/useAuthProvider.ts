@@ -28,6 +28,7 @@ const useAuthProvider = () => {
   // Function to logout
   const logout = async () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('logged_in_once');
     sessionStorage.clear();
     setUser(null);
 
