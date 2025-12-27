@@ -33,6 +33,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
   useEffect(() => {
     setMounted(true)
+    localStorage.setItem("logged_in_once", "true")
     const handleScroll = () => {
       if (window.scrollY > 10) {
         setIsScrolled(true)
