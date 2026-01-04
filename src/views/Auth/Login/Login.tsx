@@ -13,8 +13,8 @@ const Login = () => {
   const navigate = useNavigate();
   const { fetchUser } = useAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('a4335721@gmail.com');
+  const [password, setPassword] = useState('Aa^@123456');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
