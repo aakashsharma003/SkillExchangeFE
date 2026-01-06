@@ -1,98 +1,107 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from "react-router-dom";
-import { getChats } from '@/api/chat';
-import SidebarPage from '@/components/Dashboard/SideBar'; 
-import { useUser } from '@/context/auth/useUser';
-import { IChat } from '@/types/chat';
-import { Loader2, Search, MoreVertical, MessageSquare } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
-import { BASE_URL } from '@/api/auth';
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import ChatRoom from '@/components/Chat/ChatRoom';
+import React, { useEffect, useRef, useState } from "react"
+import { useNavigate } from "react-router-dom"
 
-const WEBSOCKET_URL = BASE_URL + '/ws-chat';
+import { getChats } from "@/api/chat"
+import SidebarPage from "@/components/Dashboard/SideBar"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { useUser } from "@/context/auth/useUser"
+import { cn } from "@/lib/utils"
+import ChatRoom from "@/components/Chat/ChatRoom"
+import { IChat } from "@/types/chat"
+import { Client } from "@stomp/stompjs"
+import { Loader2, MessageSquare, MoreVertical, Search } from "lucide-react"
+import SockJS from "sockjs-client"
+import toast from "react-hot-toast"
+
+import { BASE_URL } from "@/api/auth"
+
+// WebSocket endpoint for live chat updates.
+const WEBSOCKET_URL = BASE_URL + "/ws-chat"
 
 const Chat: React.FC = () => {
-    const { id } = useUser().user;
-    const navigate = useNavigate();
-    const [chats, setChats] = useState<IChat[]>([]);
-    const [chatsLoading, setChatsLoading] = useState(false);
-    const [selectedChat, setSelectedChat] = useState<IChat | null>(null);
-    const [searchQuery, setSearchQuery] = useState("");
-    const clientRef = useRef<any>(null);
+    const { id } = useUser().user
+    const navigate = useNavigate()
+    const [chats, setChats] = useState<IChat[]>([])
+    const [chatsLoading, setChatsLoading] = useState(false)
+    const [selectedChat, setSelectedChat] = useState<IChat | null>(null)
+    const [searchQuery, setSearchQuery] = useState("")
+    const clientRef = useRef<any>(null)
 
     useEffect(() => {
         (async () => {
             try {
-                setChatsLoading(true);
-                const res = await getChats(id);
-                if (!res.success) return toast.error(res.message);
+                setChatsLoading(true)
+
+                // Load all chat rooms for the current user.
+                // NOTE: if you want to work with dummy data only,
+                // you can stub `getChats` to return a resolved Promise.
+                const res = await getChats(id)
+                if (!res.success) return toast.error(res.message)
                 
                 const mappedChats = res.data.map((chat: any) => ({
                     ...chat,
-                    chatRoomId: chat.chatroomId || chat.id 
-                }));
+                    chatRoomId: chat.chatroomId || chat.id,
+                }))
                 
-                setChats(mappedChats);
-                if (mappedChats.length > 0) setSelectedChat(mappedChats[0]);
-                setChatsLoading(false);
+                setChats(mappedChats)
+                if (mappedChats.length > 0) setSelectedChat(mappedChats[0])
+                setChatsLoading(false)
             } catch (err) {
-                console.error(err);
-                toast.error('Something went wrong. Unable to fetch all chats');
-                setChatsLoading(false);
+                console.error(err)
+                toast.error("Something went wrong. Unable to fetch all chats")
+                setChatsLoading(false)
             }
-        })();
-    }, [id]);
+        })()
+    }, [id])
 
     useEffect(() => {
-        if (chats.length === 0) return;
+        if (chats.length === 0) return
 
         const stompClient = new Client({
             webSocketFactory: () => new SockJS(WEBSOCKET_URL),
             reconnectDelay: 5000,
             debug: (str) => console.log(str),
-        });
+        })
 
+        // Subscribe to user-specific topic so we can re-order chats on new messages.
         stompClient.onConnect = () => {
             stompClient.subscribe(`/topic/user/${id}`, (message) => {
-                const receivedMessage = JSON.parse(message.body);
-                updateChats(receivedMessage.chatRoomId); 
-            });
-        };
+                const receivedMessage = JSON.parse(message.body)
+                updateChats(receivedMessage.chatRoomId)
+            })
+        }
 
-        stompClient.activate();
-        clientRef.current = stompClient;
+        stompClient.activate()
+        clientRef.current = stompClient
 
         return () => {
-            stompClient.deactivate();
-        };
-    }, [chats, id]);
+            stompClient.deactivate()
+        }
+    }, [chats, id])
 
     const handleNavigate = (href: string) => {
-    navigate(href);
-    console.log(`Navigating to: ${href}`);
-    };
+        navigate(href)
+        console.log(`Navigating to: ${href}`)
+    }
 
     const updateChats = (chatRoomId: string) => {
-        setChats(prevChats => {
-            const updatedChat = prevChats.find(chat => chat.chatRoomId === chatRoomId);
-            if (!updatedChat) return prevChats;
-            const otherChats = prevChats.filter(chat => chat.chatRoomId !== chatRoomId);
-            return [updatedChat, ...otherChats];
-        });
+        // Move the updated chat to the top of the list while preserving order.
+        setChats((prevChats) => {
+            const updatedChat = prevChats.find((chat) => chat.chatRoomId === chatRoomId)
+            if (!updatedChat) return prevChats
+            const otherChats = prevChats.filter((chat) => chat.chatRoomId !== chatRoomId)
+            return [updatedChat, ...otherChats]
+        })
     };
 
     const handleLogout = () => {
-        navigate("/login");
-    };
+        navigate("/login")
+    }
 
-    const filteredChats = chats.filter(chat => 
-        chat.otherUser?.fullName?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredChats = chats.filter((chat) =>
+        chat.otherUser?.fullName?.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
 
     // FIX: Removed margins from main tag here
     if (!chatsLoading && chats.length === 0) {
@@ -101,13 +110,13 @@ const Chat: React.FC = () => {
                 <SidebarPage onNavigate={handleNavigate} />
                 <main className="flex flex-1 items-center justify-center">
                     <div className="text-center">
-                        <MessageSquare className="h-16 w-16 mx-auto text-muted-foreground/40 mb-4" />
+                        <MessageSquare className="mx-auto mb-4 h-16 w-16 text-muted-foreground/40" />
                         <h1 className="text-2xl font-semibold">No chats found.</h1>
-                        <p className="text-muted-foreground mt-2">Make some exchange requests to access chats.</p>
+                        <p className="mt-2 text-muted-foreground">Make some exchange requests to access chats.</p>
                     </div>
                 </main>
             </div>
-        );
+        )
     }
 
     return (

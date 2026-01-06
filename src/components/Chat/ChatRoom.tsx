@@ -1,20 +1,20 @@
-import { getChat } from "@/api/chat"
-import type { IChat, IMessage } from "@/types/chat"
 import { useEffect, useRef, useState } from "react"
-import toast from "react-hot-toast"
 
-import { Client } from "@stomp/stompjs"
-import SockJS from "sockjs-client"
-import { BASE_URL } from "@/api/auth"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { useUser } from "@/context/auth/useUser"
 import { formatTimeAgo } from "@/utils/date"
+import { Client } from "@stomp/stompjs"
+import { Loader2, Mic, MoreVertical, Paperclip, Phone, Send, Smile, Video } from "lucide-react"
+import SockJS from "sockjs-client"
+import toast from "react-hot-toast"
 
-// Refined UI Components
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Phone, Video, MoreVertical, Send, Paperclip, Smile, Mic, Loader2 } from "lucide-react"
+import { getChat } from "@/api/chat"
+import type { IChat, IMessage } from "@/types/chat"
+import { BASE_URL } from "@/api/auth"
 
+// WebSocket endpoint for all room-specific messages.
 const WEBSOCKET_URL = BASE_URL + "/ws-chat"
 
 export default function ChatRoom({
@@ -48,6 +48,10 @@ export default function ChatRoom({
       if (!actualRoomId) return
       try {
         setLoading(true)
+
+        // Initial history load for the current room.
+        // To work against dummy data only, you can stub `getChat` to return
+        // a resolved Promise with mock messages.
         const res = await getChat(actualRoomId)
         if (res.success) {
           setMessages(res.data)
@@ -71,6 +75,7 @@ export default function ChatRoom({
       webSocketFactory: () => new SockJS(WEBSOCKET_URL),
       reconnectDelay: 5000,
       onConnect: () => {
+        // Subscribe to messages for this specific room.
         stompClient.subscribe(`/topic/room/${actualRoomId}`, (payload) => {
           const receivedMessage = JSON.parse(payload.body)
           setMessages((prev) => {
