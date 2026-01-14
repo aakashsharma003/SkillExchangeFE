@@ -1,16 +1,15 @@
-import { ICreateChatFormData } from "@/types/chat"
-
-import { api } from "./auth"
+import type { ICreateChatFormData, IChat, IMessage } from "@/types/chat"
+import { api } from "@/api/auth"
 
 /**
- * Chat API helpers.
+ * Real backend-backed Chat API.
  *
- * All functions below talk to the backend using the shared axios `api` client.
- * To run the UI against dummy data only, you can temporarily replace each
- * `api.*` call with a `Promise.resolve({ success: true, data: [...] })`.
+ * Endpoints (Spring Boot):
+ * - POST /api/chat/rooms
+ * - GET  /api/chat/rooms/{userId}
+ * - GET  /api/chat/rooms/{roomId}/messages
  */
 
-// Create a new chat room for a specific exchange request / user pair.
 export const createChatRoom = async (payload: ICreateChatFormData) => {
   const token = localStorage.getItem("token")
 
@@ -21,24 +20,47 @@ export const createChatRoom = async (payload: ICreateChatFormData) => {
   return response.data
 }
 
-// Fetch all chat rooms for a user by their user id.
-export const getChats = async (id: string) => {
+export const getChats = async (userId: string) => {
   const token = localStorage.getItem("token")
 
-  const response = await api.get(`chat/rooms/${id}`, {
+  const response = await api.get(`/chat/rooms/${userId}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
 
-  return response.data
+  // Normalize backend payload -> frontend IChat shape
+  const res = response.data
+  if (res?.success && Array.isArray(res.data)) {
+    res.data = res.data.map((room: any): IChat => ({
+      chatRoomId: room.chatRoomId || room.id,
+      otherUser: room.otherUser,
+      offeredSkill: room.offeredSkill || "",
+      requestedSkill: room.requestedSkill || "",
+      lastActivityAt: room.lastActivityAt,
+      exchangeRequestId: room.exchangeRequestId,
+    }))
+  }
+
+  return res
 }
 
-// Fetch all messages for a particular chat room.
 export const getChat = async (chatRoomId: string) => {
   const token = localStorage.getItem("token")
 
-  const response = await api.get(`chat/rooms/${chatRoomId}/messages`, {
+  const response = await api.get(`/chat/rooms/${chatRoomId}/messages`, {
     headers: { Authorization: `Bearer ${token}` },
   })
 
-  return response.data
+  const res = response.data
+  if (res?.success && Array.isArray(res.data)) {
+    res.data = res.data.map((m: any): IMessage => ({
+      id: m.id,
+      chatRoomId: m.chatRoomId,
+      senderId: m.senderId,
+      senderEmail: m.senderEmail,
+      content: m.content,
+      createdAt: m.createdAt,
+    }))
+  }
+
+  return res
 }

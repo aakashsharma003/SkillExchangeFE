@@ -15,6 +15,7 @@ type SkillInputProps = {
   skills: string[]
   addSkill: (value: string) => void
   removeSkill: (value: string) => void
+  label?: string
 }
 
 /**
@@ -24,7 +25,7 @@ type SkillInputProps = {
  * lives in one place and is automatically filtered to avoid already-selected
  * entries.
  */
-export default function SkillInput({ skills, addSkill, removeSkill }: SkillInputProps) {
+export default function SkillInput({ skills, addSkill, removeSkill, label = "Skills" }: SkillInputProps) {
   const { skills: availableSkills, loading } = useSkillsOptions(skills)
 
   const [skillInput, setSkillInput] = useState("")
@@ -32,7 +33,7 @@ export default function SkillInput({ skills, addSkill, removeSkill }: SkillInput
 
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium">Skills</label>
+      <label className="mb-1 block text-sm font-medium">{label}</label>
 
       <div className="mb-2 flex gap-2">
         <Command className="mb-2 rounded-md border">

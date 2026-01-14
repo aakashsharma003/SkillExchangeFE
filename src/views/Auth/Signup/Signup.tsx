@@ -18,21 +18,31 @@ const Signup = () => {
     fullName: '',
     email: '',
     phone: '',
-    skills: [],
+    skillsOffered: [],
+    interests: [],
     password: '',
   });
-  const { fullName, email, phone, skills, password } = formData;
+  const { fullName, email, phone, skillsOffered, interests, password } = formData;
 
   const setFormValue = (label: string, value: string) =>
     setFormData({ ...formData, [label]: value });
 
-  const addSkill = (skill: string) =>
-    setFormData({ ...formData, skills: [...formData.skills, skill] });
+  const addSkillOffered = (skill: string) =>
+    setFormData({ ...formData, skillsOffered: [...formData.skillsOffered, skill] });
 
-  const removeSkill = (skill: string) =>
+  const removeSkillOffered = (skill: string) =>
     setFormData({
       ...formData,
-      skills: formData.skills.filter(val => skill !== val),
+      skillsOffered: formData.skillsOffered.filter((val) => skill !== val),
+    });
+
+  const addInterest = (skill: string) =>
+    setFormData({ ...formData, interests: [...formData.interests, skill] });
+
+  const removeInterest = (skill: string) =>
+    setFormData({
+      ...formData,
+      interests: formData.interests.filter((val) => skill !== val),
     });
 
   const handleSignup = async () => {
@@ -74,8 +84,8 @@ const Signup = () => {
             <Input
               label='Name'
               placeholder='Enter your name'
-              value={name}
-              onChange={(value: string) => setFormValue('name', value)}
+              value={fullName}
+              onChange={(value: string) => setFormValue('fullName', value)}
             />
 
             <Input
@@ -90,15 +100,23 @@ const Signup = () => {
               placeholder='Enter your contact number'
               value={phone}
               onChange={(value: string) =>
-                setFormValue('contact', value.replace(/\D/g, ''))
+                setFormValue('phone', value.replace(/\D/g, ''))
               }
               props={{ maxLength: 10 }}
             />
 
             <SkillInput
-              skills={skills}
-              addSkill={addSkill}
-              removeSkill={removeSkill}
+              label="Can Teach"
+              skills={skillsOffered}
+              addSkill={addSkillOffered}
+              removeSkill={removeSkillOffered}
+            />
+
+            <SkillInput
+              label="Wants to Learn"
+              skills={interests}
+              addSkill={addInterest}
+              removeSkill={removeInterest}
             />
 
             <Input

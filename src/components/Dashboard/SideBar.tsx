@@ -1,5 +1,10 @@
 import React from "react"
-import { Home, Users, Search, MessageSquare, Award, Target, Settings, Bell } from "lucide-react"
+
+import { Bell, Award, Home, MessageSquare, Search, Settings, Target, Users } from "lucide-react"
+import { useLocation, useNavigate } from "react-router-dom"
+import toast from "react-hot-toast"
+
+import appRoutes from "@/routes/appRoutes"
 
 interface NavigationItem {
   name: string
@@ -8,13 +13,15 @@ interface NavigationItem {
 }
 
 const navigation: NavigationItem[] = [
-  { name: "Home", href: "/dashboard", icon: Home },
-  { name: "My Requests", href: "/skill-exchange-requests", icon: Users },
-  { name: "Find Skills", href: "/find-skills", icon: Search },
-  { name: "Chats", href: "/chats", icon: MessageSquare },
+  { name: "Home", href: appRoutes.dashboard, icon: Home },
+  { name: "My Requests", href: appRoutes.skillExchangeRequests, icon: Users },
+  { name: "Find Skills", href: appRoutes.findSkills, icon: Search },
+  { name: "Chats", href: appRoutes.chats, icon: MessageSquare },
+  // These routes are not fully implemented yet – we keep them in the UI but
+  // show a toast instead of navigating to a 404.
   { name: "Notifications", href: "/notifications", icon: Bell },
-  { name: "Certifications", href: "/certifications", icon: Award },
-  { name: "Challenges", href: "/challenges", icon: Target },
+  { name: "Certifications", href: appRoutes.certifications, icon: Award },
+  { name: "Challenges", href: appRoutes.skillChallenges, icon: Target },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
 
@@ -24,9 +31,23 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ currentPath = "/dashboard", onNavigate }: SidebarProps) {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  // Prefer the explicitly provided path, otherwise fall back to the real URL.
+  const activePath = currentPath || location.pathname
+
   const handleClick = (href: string) => {
+    // For unfinished sections, keep the UI but avoid broken navigation.
+    if (href === "/notifications" || href === "/settings") {
+      toast.info("This section is coming soon.")
+      return
+    }
+
     if (onNavigate) {
       onNavigate(href)
+    } else {
+      navigate(href)
     }
   }
 
@@ -43,7 +64,7 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate }: Side
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-4">
         {navigation.map((item) => {
-          const isActive = currentPath === item.href
+          const isActive = activePath === item.href
           const Icon = item.icon
 
           return (
@@ -64,9 +85,10 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate }: Side
       {/* User Profile */}
       <div className="border-t border-gray-200 p-4">
         <button
-          onClick={() => handleClick("/profile")}
+          // Use the existing edit-profile route so this always works from dashboard.
+          onClick={() => handleClick(appRoutes.editProfile)}
           className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-gray-50 ${
-            currentPath === "/profile" ? "bg-gray-100" : ""
+            activePath === appRoutes.editProfile ? "bg-gray-100" : ""
           }`}
         >
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200">

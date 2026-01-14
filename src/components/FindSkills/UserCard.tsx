@@ -10,7 +10,7 @@ export default function UserCard({
   onClick: () => void;
 }) {
   const navigate = useNavigate();
-  const { fullName, email, phone, skills } = user;
+  const { fullName, email, phone, skillsOffered } = user;
 
   return (
     <div className='bg-white p-5 rounded-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.1)] w-full max-w-xs text-center flex flex-col'>
@@ -26,7 +26,7 @@ export default function UserCard({
       <p className='mb-2 color-[#666] text-base'>📞 {phone}</p>
 
       <div className='mb-4'>
-        {skills.map((skill: string, i: number) => (
+        {skillsOffered.map((skill: string, i: number) => (
           <span
             key={i}
             className='bg-[#E0E7FF] text-[#1E40AF] px-2 py-1 rounded-2xl inline-block m-1 text-xs'

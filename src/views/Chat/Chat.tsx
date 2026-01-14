@@ -34,18 +34,10 @@ const Chat: React.FC = () => {
                 setChatsLoading(true)
 
                 // Load all chat rooms for the current user.
-                // NOTE: if you want to work with dummy data only,
-                // you can stub `getChats` to return a resolved Promise.
                 const res = await getChats(id)
-                if (!res.success) return toast.error(res.message)
-                
-                const mappedChats = res.data.map((chat: any) => ({
-                    ...chat,
-                    chatRoomId: chat.chatroomId || chat.id,
-                }))
-                
-                setChats(mappedChats)
-                if (mappedChats.length > 0) setSelectedChat(mappedChats[0])
+
+                setChats(res.data)
+                if (res.data.length > 0) setSelectedChat(res.data[0])
                 setChatsLoading(false)
             } catch (err) {
                 console.error(err)

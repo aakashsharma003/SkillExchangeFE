@@ -11,7 +11,7 @@ import { api } from "./auth"
  * - return the backend response payload (which includes `success`, `data`, etc.).
  *
  * If you don't have a backend ready yet, you can temporarily replace the
- * `api.*` calls with `Promise.resolve({ success: true, data: /* dummy */ })`
+ * `api.*` calls with `Promise.resolve({ success: true, data: [] })`
  * to keep the rest of the UI working against dummy data.
  */
 

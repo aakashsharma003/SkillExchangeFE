@@ -2,26 +2,27 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
-} from 'react-router-dom';
-import { RootErrorBoundary } from './RootErrorBoundary';
-import NotFound from '../views/NotFound/NotFound';
-import FindSkills from '@/views/FindSkills/FindSkills.tsx';
-import Posts from '../users/post';
-import CreateSession from '../users/CreateSession';
-import Login from '../views/Auth/Login/Login.tsx';
-import Signup from '../views/Auth/Signup/Signup.tsx';
-import Private from './Private';
-import Public from './Public';
-import LandingPage from '@/views/LandingPage/LandingPage.tsx';
-import Otp from '@/views/Auth/Otp/Otp.tsx';
-import Chat from '@/views/Chat/Chat.tsx';
-import EditProfile from '@/views/EditProfile/EditProfile.tsx';
-import appRoutes from './appRoutes.ts';
-import Dashboard from '@/views/Dashboard/Dashboard.tsx';
-import SkillexchangeRequests from '@/views/SkillExchangeRequests/SkillExchangeRequests.tsx';
-import Profile from '@/views/Profile/Profile.tsx';
-import Certifications from '@/views/Certifications/Certifications.tsx';
-import SkillChallenges from '@/views/SkillChallenges/SkillChallenges.tsx';
+} from "react-router-dom"
+import { RootErrorBoundary } from "./RootErrorBoundary"
+import NotFound from "../views/NotFound/NotFound"
+import FindSkills from "@/views/FindSkills/FindSkills.tsx"
+import Posts from "../users/post"
+import CreateSession from "../users/CreateSession"
+import Login from "../views/Auth/Login/Login.tsx"
+import Signup from "../views/Auth/Signup/Signup.tsx"
+import Private from "./Private"
+import Public from "./Public"
+import LandingPage from "@/views/LandingPage/LandingPage.tsx"
+import Otp from "@/views/Auth/Otp/Otp.tsx"
+import Chat from "@/views/Chat/Chat.tsx"
+import EditProfile from "@/views/EditProfile/EditProfile.tsx"
+import appRoutes from "./appRoutes.ts"
+import Dashboard from "@/views/Dashboard/Dashboard.tsx"
+import SkillexchangeRequests from "@/views/SkillExchangeRequests/SkillExchangeRequests.tsx"
+import Profile from "@/views/Profile/Profile.tsx"
+import Certifications from "@/views/Certifications/Certifications.tsx"
+import SkillChallenges from "@/views/SkillChallenges/SkillChallenges.tsx"
+import DashboardLayout from "./DashboardLayout"
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -36,19 +37,24 @@ const router = createBrowserRouter(
 
       {/* Private / Protected Routes */}
       <Route element={<Private />}>
-        <Route path={appRoutes.dashboard} element={<Dashboard />} />
-        <Route path={appRoutes.editProfile} element={<EditProfile />} />
-        <Route path={appRoutes.findSkills} element={<FindSkills />} />
+        {/* Dashboard-style pages that share a persistent sidebar */}
+        <Route element={<DashboardLayout />}>
+          <Route path={appRoutes.dashboard} element={<Dashboard />} />
+          <Route path={appRoutes.editProfile} element={<EditProfile />} />
+          <Route path={appRoutes.findSkills} element={<FindSkills />} />
+          <Route path={appRoutes.userProfile} element={<Profile />} />
+          <Route path={appRoutes.certifications} element={<Certifications />} />
+          <Route path={appRoutes.skillChallenges} element={<SkillChallenges />} />
+          <Route
+            path={appRoutes.skillExchangeRequests}
+            element={<SkillexchangeRequests />}
+          />
+        </Route>
+
+        {/* Standalone private routes that manage their own layout */}
         <Route path={appRoutes.chats} element={<Chat />} />
         <Route path={appRoutes.posts} element={<Posts />} />
         <Route path={appRoutes.createSession} element={<CreateSession />} />
-        <Route path={appRoutes.userProfile} element={<Profile />} />
-        <Route path={appRoutes.certifications} element={<Certifications />} />
-        <Route path={appRoutes.skillChallenges} element={<SkillChallenges />} />
-        <Route
-          path={appRoutes.skillExchangeRequests}
-          element={<SkillexchangeRequests />}
-        />
       </Route>
 
       {/* Not Found Page */}

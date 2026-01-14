@@ -8,7 +8,7 @@ import { User } from '@/types/user';
 export default function ProfileHeader({ user }: { user: User }) {
   const {
     fullName,
-    skills,
+    skillsOffered,
     bio,
     location,
     githubLink,
@@ -16,7 +16,7 @@ export default function ProfileHeader({ user }: { user: User }) {
     youtubeLink,
     instagramLink,
   } = user;
-  const skillString = skills.join(', ');
+  const skillString = (skillsOffered ?? []).join(', ');
 
   return (
     <section className='bg-white rounded-xl p-6 shadow'>
@@ -30,7 +30,7 @@ export default function ProfileHeader({ user }: { user: User }) {
         <div className='flex-1'>
           <h3 className='text-xl font-semibold'>{fullName}</h3>
           {location && <p className='text-gray-400 text-md'>{location}</p>}
-          <p className='text-gray-600'>Skills: {skillString}</p>
+          <p className='text-gray-600'>Can Teach: {skillString}</p>
         </div>
 
         <div className='ml-auto self-start flex gap-2 items-center'>

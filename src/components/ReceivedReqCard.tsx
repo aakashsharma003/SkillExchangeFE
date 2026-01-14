@@ -122,7 +122,7 @@ export default function ReceivedReqCard({
           <div className='w-full'>
             <ReqCardSkillInput
               onSelect={(skill: any) => setSeletedSkill(skill)}
-              allSkills={sender.skills}
+              allSkills={(sender as any).skillsOffered ?? []}
             />
           </div>
         </div>

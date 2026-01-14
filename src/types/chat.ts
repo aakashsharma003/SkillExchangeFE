@@ -12,14 +12,14 @@ export type IChat = {
   offeredSkill: string;
   requestedSkill: string;
   lastActivityAt?: string;
+  exchangeRequestId?: string;
 };
 
 export type IMessage = {
   chatRoomId: string;
   id: string;
   senderId: string;
-  receiverId: string;
-  message: string;
+  senderEmail?: string;
+  content: string;
   createdAt: string;
-  updatedAt: string;
 };
