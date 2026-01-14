@@ -1,6 +1,8 @@
 import { ILogin, ISignUp } from '@/types/user';
 import axios from 'axios';
 export const BASE_URL = import.meta.env.VITE_APP_BASE_URL + "/api";
+// WebSocket URL (server listens on /ws-chat at root)
+export const WS_URL = import.meta.env.VITE_APP_BASE_URL + "/ws-chat";
 // console.log("Backend URL is:", BASE_URL);
 
 // Reusable Axios instance

@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { getChats } from "@/api/chat"
-import SidebarPage from "@/components/Dashboard/SideBar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useUser } from "@/context/auth/useUser"
@@ -14,10 +13,10 @@ import { Loader2, MessageSquare, MoreVertical, Search } from "lucide-react"
 import SockJS from "sockjs-client"
 import toast from "react-hot-toast"
 
-import { BASE_URL } from "@/api/auth"
+import { WS_URL } from "@/api/auth"
 
 // WebSocket endpoint for live chat updates.
-const WEBSOCKET_URL = BASE_URL + "/ws-chat"
+const WEBSOCKET_URL = WS_URL
 
 const Chat: React.FC = () => {
     const { id } = useUser().user
@@ -72,10 +71,7 @@ const Chat: React.FC = () => {
         }
     }, [chats, id])
 
-    const handleNavigate = (href: string) => {
-        navigate(href)
-        console.log(`Navigating to: ${href}`)
-    }
+    // Chat view is rendered inside the DashboardLayout which supplies the global sidebar
 
     const updateChats = (chatRoomId: string) => {
         // Move the updated chat to the top of the list while preserving order.
@@ -95,29 +91,20 @@ const Chat: React.FC = () => {
         chat.otherUser?.fullName?.toLowerCase().includes(searchQuery.toLowerCase()),
     )
 
-    // FIX: Removed margins from main tag here
     if (!chatsLoading && chats.length === 0) {
         return (
-            <div className="flex min-h-screen bg-background">
-                <SidebarPage onNavigate={handleNavigate} />
-                <main className="flex flex-1 items-center justify-center">
-                    <div className="text-center">
-                        <MessageSquare className="mx-auto mb-4 h-16 w-16 text-muted-foreground/40" />
-                        <h1 className="text-2xl font-semibold">No chats found.</h1>
-                        <p className="mt-2 text-muted-foreground">Make some exchange requests to access chats.</p>
-                    </div>
-                </main>
+            <div className="flex flex-1 items-center justify-center h-full">
+                <div className="text-center">
+                    <MessageSquare className="mx-auto mb-4 h-16 w-16 text-muted-foreground/40" />
+                    <h1 className="text-2xl font-semibold">No chats found.</h1>
+                    <p className="mt-2 text-muted-foreground">Make some exchange requests to access chats.</p>
+                </div>
             </div>
         )
     }
 
     return (
-        <div className="flex min-h-screen bg-background">
-            {/* Global Navigation Sidebar (Fixed w-64) */}
-            <SidebarPage onNavigate={handleNavigate} />
-
-            {/* FIX: Removed lg:ml-64 and ml-20. Flex will handle the positioning */}
-            <main className="flex flex-1 h-screen overflow-hidden">
+        <div className="flex flex-1 h-full overflow-hidden">
                 {/* Chat List Sidebar (The middle column) */}
                 <div className={cn(
                     "w-full md:w-80 lg:w-96 border-r border-border/30 bg-card flex flex-col",
@@ -197,7 +184,6 @@ const Chat: React.FC = () => {
                         </div>
                     )}
                 </div>
-            </main>
         </div>
     );
 };

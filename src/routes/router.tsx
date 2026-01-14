@@ -49,10 +49,10 @@ const router = createBrowserRouter(
             path={appRoutes.skillExchangeRequests}
             element={<SkillexchangeRequests />}
           />
+           <Route path={appRoutes.chats} element={<Chat />} />
         </Route>
 
         {/* Standalone private routes that manage their own layout */}
-        <Route path={appRoutes.chats} element={<Chat />} />
         <Route path={appRoutes.posts} element={<Posts />} />
         <Route path={appRoutes.createSession} element={<CreateSession />} />
       </Route>

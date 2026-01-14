@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { BASE_URL } from '@/api/auth';
+import { WS_URL } from '@/api/auth';
 import toast from 'react-hot-toast';
 
-const WEBSOCKET_URL = BASE_URL.replace('/api', '') + '/ws-chat';
+const WEBSOCKET_URL = WS_URL;
 
 export interface Notification {
   type: string;

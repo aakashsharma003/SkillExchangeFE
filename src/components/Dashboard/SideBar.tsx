@@ -28,9 +28,11 @@ const navigation: NavigationItem[] = [
 interface SidebarProps {
   currentPath?: string
   onNavigate?: (href: string) => void
+  isOpen?: boolean
+  onToggle?: () => void
 }
 
-export default function Sidebar({ currentPath = "/dashboard", onNavigate }: SidebarProps) {
+export default function Sidebar({ currentPath = "/dashboard", onNavigate, isOpen = true, onToggle }: SidebarProps) {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -40,7 +42,7 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate }: Side
   const handleClick = (href: string) => {
     // For unfinished sections, keep the UI but avoid broken navigation.
     if (href === "/notifications" || href === "/settings") {
-      toast.info("This section is coming soon.")
+      toast("This section is coming soon.")
       return
     }
 
@@ -52,17 +54,37 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate }: Side
   }
 
   return (
-    <div className="relative flex w-64 flex-col border-r border-gray-200 bg-white">
+    <div className={`fixed left-0 top-0 h-screen flex flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out ${
+      isOpen ? "w-64" : "w-20"
+    } z-40`}>
       {/* Header */}
-      <div className="flex h-16 items-center gap-3 border-b border-gray-200 px-6">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black">
-          <span className="text-base font-bold text-white">SE</span>
+      <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black flex-shrink-0">
+            <span className="text-base font-bold text-white">SE</span>
+          </div>
+          {isOpen && <span className="text-xl font-semibold text-gray-900 whitespace-nowrap">SkillExchange</span>}
         </div>
-        <span className="text-xl font-semibold text-gray-900">SkillExchange</span>
+        <button
+          onClick={onToggle}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+          aria-label="Toggle sidebar"
+        >
+          <svg
+            className={`h-5 w-5 text-gray-600 transition-transform duration-300 ${
+              !isOpen ? "rotate-180" : ""
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-4">
+      <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
         {navigation.map((item) => {
           const isActive = activePath === item.href
           const Icon = item.icon
@@ -71,12 +93,13 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate }: Side
             <button
               key={item.name}
               onClick={() => handleClick(item.href)}
+              title={!isOpen ? item.name : undefined}
               className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                 isActive ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               }`}
             >
               <Icon className="h-5 w-5 shrink-0" />
-              <span>{item.name}</span>
+              {isOpen && <span>{item.name}</span>}
             </button>
           )
         })}
@@ -87,6 +110,7 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate }: Side
         <button
           // Use the existing edit-profile route so this always works from dashboard.
           onClick={() => handleClick(appRoutes.editProfile)}
+          title={!isOpen ? "View Profile" : undefined}
           className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-gray-50 ${
             activePath === appRoutes.editProfile ? "bg-gray-100" : ""
           }`}
@@ -94,10 +118,12 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate }: Side
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200">
             <span className="text-sm font-medium text-gray-700">AS</span>
           </div>
-          <div className="flex-1 overflow-hidden text-left">
-            <p className="truncate text-sm font-semibold text-gray-900">Akash Sharma</p>
-            <p className="truncate text-xs text-gray-500">View Profile</p>
-          </div>
+          {isOpen && (
+            <div className="flex-1 overflow-hidden text-left">
+              <p className="truncate text-sm font-semibold text-gray-900">Akash Sharma</p>
+              <p className="truncate text-xs text-gray-500">View Profile</p>
+            </div>
+          )}
         </button>
       </div>
     </div>

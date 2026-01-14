@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, ReactNode } from 'react';
 import { useWebSocket, Notification } from '@/hooks/useWebSocket';
-import { useUser } from '@/context/auth/useUser';
+import { useAuth } from '@/context/auth/useAuth';
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -13,10 +13,10 @@ interface NotificationProviderProps {
 }
 
 export function NotificationProvider({ children }: NotificationProviderProps) {
-  const { user } = useUser();
+  const { user } = useAuth();
   const notifications: Notification[] = []; // Can be enhanced to store notifications
 
-  // Connect to WebSocket for notifications
+  // Connect to WebSocket for notifications only if user is loaded
   useWebSocket({
     userId: user?.id || '',
     onNotification: (notification) => {

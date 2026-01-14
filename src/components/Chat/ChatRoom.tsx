@@ -12,10 +12,10 @@ import toast from "react-hot-toast"
 
 import { getChat } from "@/api/chat"
 import type { IChat, IMessage } from "@/types/chat"
-import { BASE_URL } from "@/api/auth"
+import { WS_URL } from "@/api/auth"
 
 // WebSocket endpoint for all room-specific messages.
-const WEBSOCKET_URL = BASE_URL + "/ws-chat"
+const WEBSOCKET_URL = WS_URL
 
 export default function ChatRoom({
   chat,
