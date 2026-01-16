@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { useUser } from "@/context/auth/useUser"
 import { formatTimeAgo } from "@/utils/date"
 import { Client } from "@stomp/stompjs"
-import { Loader2, Mic, MoreVertical, Paperclip, Phone, Send, Smile, Video } from "lucide-react"
+import { Loader2, Mic, MoreVertical, Paperclip, Phone, Send, Smile, Video, AlertCircle } from "lucide-react"
 import SockJS from "sockjs-client"
 import toast from "react-hot-toast"
 
@@ -31,6 +31,8 @@ export default function ChatRoom({
   const [messages, setMessages] = useState<IMessage[]>([])
   const [loading, setLoading] = useState(false)
   const [newMessage, setNewMessage] = useState("")
+  const [isConnected, setIsConnected] = useState(false)
+  const [connectionError, setConnectionError] = useState<string | null>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const clientRef = useRef<Client | null>(null)
@@ -71,19 +73,47 @@ export default function ChatRoom({
   useEffect(() => {
     if (!actualRoomId) return
 
+    console.log("Connecting to WebSocket:", WEBSOCKET_URL)
+
     const stompClient = new Client({
       webSocketFactory: () => new SockJS(WEBSOCKET_URL),
       reconnectDelay: 5000,
+      heartbeatIncoming: 10000,
+      heartbeatOutgoing: 10000,
+      debug: (str) => console.log("STOMP:", str),
       onConnect: () => {
+        console.log("WebSocket connected successfully")
+        setIsConnected(true)
+        setConnectionError(null)
+        
         // Subscribe to messages for this specific room.
         stompClient.subscribe(`/topic/room/${actualRoomId}`, (payload) => {
-          const receivedMessage = JSON.parse(payload.body)
-          setMessages((prev) => {
-            if (prev.find((m) => m.id === receivedMessage.id)) return prev
-            return [...prev, receivedMessage]
-          })
-          updateChats(actualRoomId)
+          try {
+            const receivedMessage = JSON.parse(payload.body)
+            setMessages((prev) => {
+              if (prev.find((m) => m.id === receivedMessage.id)) return prev
+              return [...prev, receivedMessage]
+            })
+            updateChats(actualRoomId)
+          } catch (error) {
+            console.error("Error parsing message:", error)
+          }
         })
+      },
+      onStompError: (frame) => {
+        console.error("STOMP error:", frame)
+        setIsConnected(false)
+        setConnectionError("STOMP connection error")
+        toast.error("Connection error occurred")
+      },
+      onWebSocketError: (event) => {
+        console.error("WebSocket network error:", event)
+        setIsConnected(false)
+        setConnectionError("Network error")
+      },
+      onDisconnect: () => {
+        console.log("WebSocket disconnected")
+        setIsConnected(false)
       },
     })
 
@@ -91,12 +121,23 @@ export default function ChatRoom({
     clientRef.current = stompClient
 
     return () => {
-      if (stompClient.active) stompClient.deactivate()
+      try {
+        if (clientRef.current?.active) {
+          clientRef.current.deactivate()
+        }
+      } catch (error) {
+        console.error("Error deactivating STOMP:", error)
+      }
     }
   }, [actualRoomId, updateChats])
 
   const handleSendMessage = () => {
     if (newMessage.trim() === "" || !actualRoomId) return
+
+    if (!isConnected) {
+      toast.error("Reconnecting to server... Please try again")
+      return
+    }
 
     if (clientRef.current?.connected) {
       const msgPayload = {
@@ -106,14 +147,20 @@ export default function ChatRoom({
         chatRoomId: actualRoomId,
       }
 
-      clientRef.current.publish({
-        destination: "/app/chat.send",
-        body: JSON.stringify(msgPayload),
-      })
+      try {
+        clientRef.current.publish({
+          destination: "/app/chat.send",
+          body: JSON.stringify(msgPayload),
+        })
 
-      setNewMessage("")
+        setNewMessage("")
+      } catch (error) {
+        console.error("Send error:", error)
+        toast.error("Failed to send message")
+      }
     } else {
-      toast.error("Connecting to server...")
+      toast.error("Still connecting to server...")
+      setIsConnected(false)
     }
   }
 
@@ -121,13 +168,13 @@ export default function ChatRoom({
     <div className="flex h-screen flex-col bg-background">
       {/* --- Refined Header --- */}
       <div className="flex items-center justify-between border-b border-border/50 p-4 md:px-6 bg-card">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-1">
           <Avatar className="h-10 w-10 md:h-12 md:w-12">
             <AvatarFallback className="bg-primary/10 text-primary font-bold">
               {otherUser?.fullName?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div>
+          <div className="flex-1">
             <p className="font-semibold text-sm md:text-base">{otherUser?.fullName}</p>
             <p className="text-[11px] text-muted-foreground">
               Learning <span className="text-primary font-medium">{requestedSkill}</span> | Teaching{" "}
@@ -135,12 +182,21 @@ export default function ChatRoom({
             </p>
           </div>
         </div>
+
         <div className="flex gap-1">
           <Button size="icon" variant="ghost" className="h-9 w-9"><Phone className="h-4 w-4 text-muted-foreground" /></Button>
           <Button size="icon" variant="ghost" className="h-9 w-9"><Video className="h-4 w-4 text-muted-foreground" /></Button>
           <Button size="icon" variant="ghost" className="h-9 w-9"><MoreVertical className="h-4 w-4 text-muted-foreground" /></Button>
         </div>
       </div>
+
+      {/* --- Connection Error Banner --- */}
+      {connectionError && (
+        <div className="bg-red-50 border-b border-red-200 p-3 text-sm text-red-700 flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <span>{connectionError}</span>
+        </div>
+      )}
 
       {/* --- Refined Messages Area --- */}
       <div 
@@ -210,11 +266,12 @@ export default function ChatRoom({
             </Button>
             
             <Input
-              placeholder="Type your message..."
+              placeholder={isConnected ? "Type your message..." : "Connecting..."}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-              className="flex-1 rounded-full bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-primary h-10"
+              onKeyDown={(e) => e.key === "Enter" && isConnected && handleSendMessage()}
+              className="flex-1 rounded-full bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-primary h-10 disabled:opacity-50"
+              disabled={!isConnected}
             />
 
             <Button size="icon" variant="ghost" className="shrink-0 text-muted-foreground hidden sm:flex">
@@ -222,8 +279,9 @@ export default function ChatRoom({
             </Button>
             <Button 
               size="icon" 
-              onClick={handleSendMessage} 
-              className="shrink-0 rounded-full h-10 w-10 shadow-md transition-transform active:scale-90"
+              onClick={handleSendMessage}
+              disabled={!isConnected || !newMessage.trim()}
+              className="shrink-0 rounded-full h-10 w-10 shadow-md transition-transform active:scale-90 disabled:opacity-50"
             >
               <Send className="h-5 w-5" />
             </Button>

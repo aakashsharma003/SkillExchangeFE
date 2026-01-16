@@ -1,9 +1,21 @@
 import { ILogin, ISignUp } from '@/types/user';
 import axios from 'axios';
-export const BASE_URL = import.meta.env.VITE_APP_BASE_URL + "/api";
-// WebSocket URL (server listens on /ws-chat at root)
-export const WS_URL = import.meta.env.VITE_APP_BASE_URL + "/ws-chat";
-// console.log("Backend URL is:", BASE_URL);
+
+const BASE_URL = import.meta.env.VITE_APP_BASE_URL + "/api";
+
+// WebSocket URL - convert HTTP/HTTPS to WS/WSS
+const getWebSocketUrl = () => {
+  let baseUrl = import.meta.env.VITE_APP_BASE_URL;
+  if (baseUrl.startsWith('https://')) {
+    baseUrl = baseUrl.replace('https://', 'wss://');
+  } else if (baseUrl.startsWith('http://')) {
+    baseUrl = baseUrl.replace('http://', 'ws://');
+  }
+  return baseUrl + "/api/ws-chat";
+};
+
+export const BASE_URL_FOR_API = BASE_URL;
+export const WS_URL = getWebSocketUrl();
 
 // Reusable Axios instance
 export const api = axios.create({
@@ -23,7 +35,13 @@ export const verifyOtp = async (data: {
   userDetails: ISignUp;
   otp: number;
 }) => {
-  const response = await api.post('/auth/verifyOtp', data);
+  // Map frontend field names to backend field names
+  const payload = {
+    signupData: data.userDetails,
+    otp: data.otp,
+    email: data.userDetails.email,
+  };
+  const response = await api.post('/auth/signup/verify', payload);
 
   return response.data;
 };

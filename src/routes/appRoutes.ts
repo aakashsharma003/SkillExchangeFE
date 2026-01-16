@@ -15,6 +15,7 @@ const appRoutes = {
   userProfile: '/user-profile',
   certifications: '/certifications',
   skillChallenges: '/skill-challenges',
+  settings: '/settings',
 } as const;
 
 export default appRoutes;

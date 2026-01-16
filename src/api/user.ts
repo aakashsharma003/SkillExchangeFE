@@ -46,3 +46,28 @@ export const fetchUserProfile = async (email: string) => {
 
   return response.data;
 };
+
+// Delete user account
+export const deleteAccount = async () => {
+  const token = localStorage.getItem('token');
+
+  const response = await api.delete('/users/delete-account', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return response.data;
+};
+
+// Report suspicious activity
+export const reportSuspiciousActivity = async (data: {
+  description: string;
+  relatedUser: string | null;
+}) => {
+  const token = localStorage.getItem('token');
+
+  const response = await api.post('/users/report-activity', data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return response.data;
+};

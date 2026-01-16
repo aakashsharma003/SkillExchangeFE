@@ -12,6 +12,7 @@ import { Client } from "@stomp/stompjs"
 import { Loader2, MessageSquare, MoreVertical, Search } from "lucide-react"
 import SockJS from "sockjs-client"
 import toast from "react-hot-toast"
+import { useSidebar } from "@/routes/DashboardLayout"
 
 import { WS_URL } from "@/api/auth"
 
@@ -21,6 +22,7 @@ const WEBSOCKET_URL = WS_URL
 const Chat: React.FC = () => {
     const { id } = useUser().user
     const navigate = useNavigate()
+    const { setSidebarOpen } = useSidebar()
     const [chats, setChats] = useState<IChat[]>([])
     const [chatsLoading, setChatsLoading] = useState(false)
     const [selectedChat, setSelectedChat] = useState<IChat | null>(null)
@@ -52,22 +54,39 @@ const Chat: React.FC = () => {
         const stompClient = new Client({
             webSocketFactory: () => new SockJS(WEBSOCKET_URL),
             reconnectDelay: 5000,
-            debug: (str) => console.log(str),
+            heartbeatIncoming: 10000,
+            heartbeatOutgoing: 10000,
+            debug: (str) => console.log("STOMP:", str),
+            onConnect: () => {
+                console.log("Chat sidebar WebSocket connected")
+                stompClient.subscribe(`/topic/user/${id}`, (message) => {
+                    try {
+                        const receivedMessage = JSON.parse(message.body)
+                        updateChats(receivedMessage.chatRoomId)
+                    } catch (error) {
+                        console.error("Error parsing chat sidebar message:", error)
+                    }
+                })
+            },
+            onStompError: (frame) => {
+                console.error("Chat sidebar STOMP error:", frame)
+            },
+            onWebSocketError: (event) => {
+                console.error("Chat sidebar WebSocket error:", event)
+            },
         })
-
-        // Subscribe to user-specific topic so we can re-order chats on new messages.
-        stompClient.onConnect = () => {
-            stompClient.subscribe(`/topic/user/${id}`, (message) => {
-                const receivedMessage = JSON.parse(message.body)
-                updateChats(receivedMessage.chatRoomId)
-            })
-        }
 
         stompClient.activate()
         clientRef.current = stompClient
 
         return () => {
-            stompClient.deactivate()
+            try {
+                if (clientRef.current?.active) {
+                    clientRef.current.deactivate()
+                }
+            } catch (error) {
+                console.error("Error deactivating chat sidebar WebSocket:", error)
+            }
         }
     }, [chats, id])
 
@@ -82,6 +101,14 @@ const Chat: React.FC = () => {
             return [updatedChat, ...otherChats]
         })
     };
+
+    const handleSelectChat = (chat: IChat) => {
+        setSelectedChat(chat)
+        // Auto-shrink sidebar on small screens (mobile/tablet) when a chat is selected
+        if (window.innerWidth < 768) {
+            setSidebarOpen(false)
+        }
+    }
 
     const handleLogout = () => {
         navigate("/login")
@@ -133,11 +160,11 @@ const Chat: React.FC = () => {
                             <div className="flex justify-center items-center h-32">
                                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                             </div>
-                        ) : (
+                        ) : filteredChats.length > 0 ? (
                             filteredChats.map((chat) => (
                                 <button
                                     key={chat.chatRoomId}
-                                    onClick={() => setSelectedChat(chat)}
+                                    onClick={() => handleSelectChat(chat)}
                                     className={cn(
                                         "w-full border-b border-border/20 p-4 text-left transition-colors hover:bg-accent/50",
                                         selectedChat?.chatRoomId === chat.chatRoomId && "bg-accent"
@@ -166,6 +193,10 @@ const Chat: React.FC = () => {
                                     </div>
                                 </button>
                             ))
+                        ) : (
+                            <div className="flex items-center justify-center h-32 text-muted-foreground">
+                                No chats found
+                            </div>
                         )}
                     </div>
                 </div>

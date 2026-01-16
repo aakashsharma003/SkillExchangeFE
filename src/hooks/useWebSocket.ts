@@ -1,10 +1,21 @@
 import { useEffect, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { WS_URL } from '@/api/auth';
+import { BASE_URL } from '@/api/auth';
 import toast from 'react-hot-toast';
 
-const WEBSOCKET_URL = WS_URL;
+// WebSocket URL for notifications - convert HTTP/HTTPS to WS/WSS
+const getWebSocketUrl = () => {
+  let baseUrl = import.meta.env.VITE_APP_BASE_URL;
+  if (baseUrl.startsWith('https://')) {
+    baseUrl = baseUrl.replace('https://', 'wss://');
+  } else if (baseUrl.startsWith('http://')) {
+    baseUrl = baseUrl.replace('http://', 'ws://');
+  }
+  return baseUrl + "/api/ws-notifications";
+};
+
+const WEBSOCKET_URL = getWebSocketUrl();
 
 export interface Notification {
   type: string;
@@ -32,6 +43,9 @@ export function useWebSocket({ userId, onNotification }: UseWebSocketOptions) {
     const stompClient = new Client({
       webSocketFactory: () => new SockJS(WEBSOCKET_URL),
       reconnectDelay: 5000,
+      heartbeatIncoming: 10000,
+      heartbeatOutgoing: 10000,
+      debug: (str) => console.log("Notification WS:", str),
       onConnect: () => {
         console.log('WebSocket connected for notifications');
         
@@ -55,10 +69,10 @@ export function useWebSocket({ userId, onNotification }: UseWebSocketOptions) {
         });
       },
       onStompError: (frame) => {
-        console.error('STOMP error:', frame);
+        console.error('Notification STOMP error:', frame);
       },
       onWebSocketError: (event) => {
-        console.error('WebSocket error:', event);
+        console.error('Notification WebSocket error:', event);
       },
     });
 
@@ -66,8 +80,12 @@ export function useWebSocket({ userId, onNotification }: UseWebSocketOptions) {
     clientRef.current = stompClient;
 
     return () => {
-      if (stompClient.active) {
-        stompClient.deactivate();
+      try {
+        if (stompClient.active) {
+          stompClient.deactivate();
+        }
+      } catch (error) {
+        console.error('Error deactivating notification WebSocket:', error);
       }
     };
   }, [userId, onNotification]);

@@ -1,15 +1,5 @@
 import { useState } from "react"
-
-import {
-  Command,
-  CommandEmpty,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "./ui/command"
-import { Loader2 } from "lucide-react"
-
-import { useSkillsOptions } from "@/hooks/use-skills-options"
+import { Input } from "./ui/input"
 
 type SkillInputProps = {
   skills: string[]
@@ -19,59 +9,53 @@ type SkillInputProps = {
 }
 
 /**
- * Multi-select wrapper around the shared skills autocomplete.
- *
- * Uses `useSkillsOptions` so the source of truth for available skills
- * lives in one place and is automatically filtered to avoid already-selected
- * entries.
+ * Direct text input for skills.
+ * Users can type any skill they have or want to learn and add it directly.
+ * No autocomplete or search - just free text input.
  */
 export default function SkillInput({ skills, addSkill, removeSkill, label = "Skills" }: SkillInputProps) {
-  const { skills: availableSkills, loading } = useSkillsOptions(skills)
-
   const [skillInput, setSkillInput] = useState("")
-  const [open, setOpen] = useState(false)
+
+  const handleAddSkill = () => {
+    const trimmedSkill = skillInput.trim()
+    if (!trimmedSkill) return
+    
+    // Check if skill already exists
+    if (skills.some(s => s.toLowerCase() === trimmedSkill.toLowerCase())) {
+      setSkillInput("")
+      return
+    }
+    
+    addSkill(trimmedSkill)
+    setSkillInput("")
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      handleAddSkill()
+    }
+  }
 
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium">{label}</label>
+      <label className="mb-2 block text-sm font-medium">{label}</label>
 
-      <div className="mb-2 flex gap-2">
-        <Command className="mb-2 rounded-md border">
-          <CommandInput
-            placeholder="Search skills..."
-            value={skillInput}
-            onValueChange={(val: string) => {
-              setSkillInput(val)
-              if (val === "") setOpen(false)
-              else if (!open) setOpen(true)
-            }}
-            onFocus={() => setOpen(true)}
-          />
-
-          {open &&
-            (loading ? (
-              <Loader2 className="mx-auto my-2 h-6 w-6 animate-spin" />
-            ) : (
-              <>
-                {skillInput !== "" && (
-                  <CommandEmpty className="py-2 text-center">no results found</CommandEmpty>
-                )}
-                <CommandList>
-                  {availableSkills.map((skill, index) => (
-                    <CommandItem
-                      key={index}
-                      className="cursor-pointer border rounded-none"
-                      onSelect={() => {
-                        addSkill(skill)
-                      }}
-                    >
-                      {skill}
-                    </CommandItem>
-                  ))}
-                </CommandList>
-              </>
-            ))}
-        </Command>
+      <div className="flex gap-2 mb-3">
+        <Input
+          placeholder={`Enter a ${label.toLowerCase()}...`}
+          value={skillInput}
+          onChange={(e) => setSkillInput(e.target.value)}
+          onKeyPress={handleKeyPress}
+          className="flex-1"
+        />
+        <button
+          type="button"
+          onClick={handleAddSkill}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+        >
+          Add
+        </button>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -88,7 +72,7 @@ export default function SkillInput({ skills, addSkill, removeSkill, label = "Ski
               }}
               className="ml-2 cursor-pointer text-lg font-bold text-blue-500 hover:text-red-500"
             >
-              x
+              ×
             </button>
           </div>
         ))}

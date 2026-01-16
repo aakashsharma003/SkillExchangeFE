@@ -23,6 +23,7 @@ import Profile from "@/views/Profile/Profile.tsx"
 import Certifications from "@/views/Certifications/Certifications.tsx"
 import SkillChallenges from "@/views/SkillChallenges/SkillChallenges.tsx"
 import DashboardLayout from "./DashboardLayout"
+import Settings from "@/views/Settings/Settings"
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -50,6 +51,7 @@ const router = createBrowserRouter(
             element={<SkillexchangeRequests />}
           />
            <Route path={appRoutes.chats} element={<Chat />} />
+          <Route path={appRoutes.settings} element={<Settings />} />
         </Route>
 
         {/* Standalone private routes that manage their own layout */}
