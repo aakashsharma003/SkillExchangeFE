@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { BASE_URL } from '@/api/auth';
 import toast from 'react-hot-toast';
 
 // WebSocket URL for notifications - convert HTTP/HTTPS to WS/WSS

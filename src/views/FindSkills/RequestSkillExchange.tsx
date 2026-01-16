@@ -240,7 +240,7 @@ export default function RequestSkillExchange({
                       <SelectItem key={s} value={s} className="cursor-pointer">
                         {s}
                       </SelectItem>
-                    )) || user?.skills?.map((s: string) => (
+                    )) || user?.skillsOffered?.map((s: string) => (
                         <SelectItem key={s} value={s} className="cursor-pointer">
                           {s}
                         </SelectItem>

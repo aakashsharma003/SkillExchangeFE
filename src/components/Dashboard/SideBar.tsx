@@ -142,14 +142,14 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate, isOpen
           </button>
           
           {/* Logout Button */}
-          <button
+          {/* <button
             onClick={handleLogoutClick}
             title={!isOpen ? "Logout" : undefined}
             className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
           >
             <LogOut className="h-5 w-5 shrink-0" />
             {isOpen && <span>Logout</span>}
-          </button>
+          </button> */}
         </div>
       </div>
     </>
