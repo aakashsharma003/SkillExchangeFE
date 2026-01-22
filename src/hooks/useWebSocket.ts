@@ -3,14 +3,11 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import toast from 'react-hot-toast';
 
-// WebSocket URL for notifications - convert HTTP/HTTPS to WS/WSS
+// WebSocket URL for notifications - SockJS requires HTTP/HTTPS, not WS/WSS
+// SockJS will handle the WebSocket protocol negotiation internally
 const getWebSocketUrl = () => {
-  let baseUrl = import.meta.env.VITE_APP_BASE_URL;
-  if (baseUrl.startsWith('https://')) {
-    baseUrl = baseUrl.replace('https://', 'wss://');
-  } else if (baseUrl.startsWith('http://')) {
-    baseUrl = baseUrl.replace('http://', 'ws://');
-  }
+  const baseUrl = import.meta.env.VITE_APP_BASE_URL;
+  // SockJS needs the HTTP/HTTPS URL, not WS/WSS
   return baseUrl + "/api/ws-notifications";
 };
 

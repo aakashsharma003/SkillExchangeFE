@@ -14,7 +14,6 @@ import { getChat } from "@/api/chat"
 import type { IChat, IMessage } from "@/types/chat"
 import { WS_URL } from "@/api/auth"
 
-// WebSocket endpoint for all room-specific messages.
 const WEBSOCKET_URL = WS_URL
 
 export default function ChatRoom({
@@ -50,10 +49,6 @@ export default function ChatRoom({
       if (!actualRoomId) return
       try {
         setLoading(true)
-
-        // Initial history load for the current room.
-        // To work against dummy data only, you can stub `getChat` to return
-        // a resolved Promise with mock messages.
         const res = await getChat(actualRoomId)
         if (res.success) {
           setMessages(res.data)
@@ -80,13 +75,17 @@ export default function ChatRoom({
       reconnectDelay: 5000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
-      debug: (str) => console.log("STOMP:", str),
+      debug: (str) => {
+        if (str.includes("CONNECTED") || str.includes("CONNECT") || str.includes("ERROR")) {
+          console.log("STOMP:", str)
+        }
+      },
       onConnect: () => {
-        console.log("WebSocket connected successfully")
+        console.log("✅ WebSocket connected and ready")
         setIsConnected(true)
         setConnectionError(null)
         
-        // Subscribe to messages for this specific room.
+        // Subscribe to messages for this specific room
         stompClient.subscribe(`/topic/room/${actualRoomId}`, (payload) => {
           try {
             const receivedMessage = JSON.parse(payload.body)
@@ -103,11 +102,10 @@ export default function ChatRoom({
       onStompError: (frame) => {
         console.error("STOMP error:", frame)
         setIsConnected(false)
-        setConnectionError("STOMP connection error")
-        toast.error("Connection error occurred")
+        setConnectionError("Connection error: " + (frame.headers?.message || "Unknown error"))
       },
       onWebSocketError: (event) => {
-        console.error("WebSocket network error:", event)
+        console.error("WebSocket error:", event)
         setIsConnected(false)
         setConnectionError("Network error")
       },
@@ -122,8 +120,8 @@ export default function ChatRoom({
 
     return () => {
       try {
-        if (clientRef.current?.active) {
-          clientRef.current.deactivate()
+        if (stompClient.active) {
+          stompClient.deactivate()
         }
       } catch (error) {
         console.error("Error deactivating STOMP:", error)
@@ -134,39 +132,36 @@ export default function ChatRoom({
   const handleSendMessage = () => {
     if (newMessage.trim() === "" || !actualRoomId) return
 
-    if (!isConnected) {
-      toast.error("Reconnecting to server... Please try again")
+    if (!clientRef.current?.active) {
+      toast.error("Not connected. Please wait...")
       return
     }
 
-    if (clientRef.current?.connected) {
-      const msgPayload = {
-        senderId: currentUser.id,
-        receiverId: otherUser.id,
-        content: newMessage,
-        chatRoomId: actualRoomId,
-      }
+    const msgPayload = {
+      senderId: currentUser.id,
+      receiverId: otherUser.id,
+      content: newMessage.trim(),
+      chatRoomId: actualRoomId,
+    }
 
-      try {
-        clientRef.current.publish({
-          destination: "/app/chat.send",
-          body: JSON.stringify(msgPayload),
-        })
-
-        setNewMessage("")
-      } catch (error) {
-        console.error("Send error:", error)
-        toast.error("Failed to send message")
+    try {
+      clientRef.current.publish({
+        destination: "/app/chat.send",
+        body: JSON.stringify(msgPayload),
+      })
+      setNewMessage("")
+    } catch (error: any) {
+      console.error("Send error:", error)
+      toast.error("Failed to send message. Please try again.")
+      if (error?.message?.includes("no underlying STOMP connection")) {
+        setIsConnected(false)
       }
-    } else {
-      toast.error("Still connecting to server...")
-      setIsConnected(false)
     }
   }
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      {/* --- Refined Header --- */}
+      {/* Header */}
       <div className="flex items-center justify-between border-b border-border/50 p-4 md:px-6 bg-card">
         <div className="flex items-center gap-3 flex-1">
           <Avatar className="h-10 w-10 md:h-12 md:w-12">
@@ -190,7 +185,7 @@ export default function ChatRoom({
         </div>
       </div>
 
-      {/* --- Connection Error Banner --- */}
+      {/* Connection Error Banner */}
       {connectionError && (
         <div className="bg-red-50 border-b border-red-200 p-3 text-sm text-red-700 flex items-center gap-2">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -198,7 +193,7 @@ export default function ChatRoom({
         </div>
       )}
 
-      {/* --- Refined Messages Area --- */}
+      {/* Messages Area */}
       <div 
         className="flex-1 overflow-y-auto bg-accent/5 p-4 md:p-6 space-y-4" 
         ref={containerRef}
@@ -254,7 +249,7 @@ export default function ChatRoom({
         </div>
       </div>
 
-      {/* --- Refined Input Bar --- */}
+      {/* Input Bar */}
       <div className="border-t border-border/50 p-4 bg-card">
         <div className="mx-auto max-w-4xl">
           <div className="flex items-center gap-2">

@@ -6,6 +6,7 @@ import toast from "react-hot-toast"
 
 import appRoutes from "@/routes/appRoutes"
 import LogoutModal from "@/views/Dashboard/LogoutModal"
+import { useUser } from "@/context/auth/useUser"
 
 interface NavigationItem {
   name: string
@@ -37,6 +38,14 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate, isOpen
   const navigate = useNavigate()
   const location = useLocation()
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  
+  // Get current user for profile display
+  let currentUser = null
+  try {
+    currentUser = useUser().user
+  } catch (error) {
+    // User not loaded yet, will show default
+  }
 
   // Prefer the explicitly provided path, otherwise fall back to the real URL.
   const activePath = currentPath || location.pathname
@@ -131,11 +140,15 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate, isOpen
             }`}
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200">
-              <span className="text-sm font-medium text-gray-700">AS</span>
+              <span className="text-sm font-medium text-gray-700">
+                {currentUser?.fullName?.charAt(0).toUpperCase() || "U"}
+              </span>
             </div>
             {isOpen && (
               <div className="flex-1 overflow-hidden text-left">
-                <p className="truncate text-sm font-semibold text-gray-900">Akash Sharma</p>
+                <p className="truncate text-sm font-semibold text-gray-900">
+                  {currentUser?.fullName || "User"}
+                </p>
                 <p className="truncate text-xs text-gray-500">View Profile</p>
               </div>
             )}

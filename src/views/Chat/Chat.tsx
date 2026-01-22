@@ -11,12 +11,10 @@ import { IChat } from "@/types/chat"
 import { Client } from "@stomp/stompjs"
 import { Loader2, MessageSquare, MoreVertical, Search } from "lucide-react"
 import SockJS from "sockjs-client"
-import toast from "react-hot-toast"
 import { useSidebar } from "@/routes/DashboardLayout"
 
 import { WS_URL } from "@/api/auth"
 
-// WebSocket endpoint for live chat updates.
 const WEBSOCKET_URL = WS_URL
 
 const Chat: React.FC = () => {
@@ -27,36 +25,31 @@ const Chat: React.FC = () => {
     const [chatsLoading, setChatsLoading] = useState(false)
     const [selectedChat, setSelectedChat] = useState<IChat | null>(null)
     const [searchQuery, setSearchQuery] = useState("")
-    const clientRef = useRef<any>(null)
+    const clientRef = useRef<Client | null>(null)
 
     useEffect(() => {
         (async () => {
             try {
                 setChatsLoading(true)
-
-                // Load all chat rooms for the current user.
                 const res = await getChats(id)
-
                 setChats(res.data)
                 if (res.data.length > 0) setSelectedChat(res.data[0])
                 setChatsLoading(false)
             } catch (err) {
                 console.error(err)
-                toast.error("Something went wrong. Unable to fetch all chats")
                 setChatsLoading(false)
             }
         })()
     }, [id])
 
     useEffect(() => {
-        if (chats.length === 0) return
+        if (chats.length === 0 || !id) return
 
         const stompClient = new Client({
             webSocketFactory: () => new SockJS(WEBSOCKET_URL),
             reconnectDelay: 5000,
             heartbeatIncoming: 10000,
             heartbeatOutgoing: 10000,
-            debug: (str) => console.log("STOMP:", str),
             onConnect: () => {
                 console.log("Chat sidebar WebSocket connected")
                 stompClient.subscribe(`/topic/user/${id}`, (message) => {
@@ -88,30 +81,22 @@ const Chat: React.FC = () => {
                 console.error("Error deactivating chat sidebar WebSocket:", error)
             }
         }
-    }, [chats, id])
-
-    // Chat view is rendered inside the DashboardLayout which supplies the global sidebar
+    }, [chats.length, id])
 
     const updateChats = (chatRoomId: string) => {
-        // Move the updated chat to the top of the list while preserving order.
         setChats((prevChats) => {
             const updatedChat = prevChats.find((chat) => chat.chatRoomId === chatRoomId)
             if (!updatedChat) return prevChats
             const otherChats = prevChats.filter((chat) => chat.chatRoomId !== chatRoomId)
             return [updatedChat, ...otherChats]
         })
-    };
+    }
 
     const handleSelectChat = (chat: IChat) => {
         setSelectedChat(chat)
-        // Auto-shrink sidebar on small screens (mobile/tablet) when a chat is selected
         if (window.innerWidth < 768) {
             setSidebarOpen(false)
         }
-    }
-
-    const handleLogout = () => {
-        navigate("/login")
     }
 
     const filteredChats = chats.filter((chat) =>
@@ -132,89 +117,89 @@ const Chat: React.FC = () => {
 
     return (
         <div className="flex flex-1 h-full overflow-hidden">
-                {/* Chat List Sidebar (The middle column) */}
-                <div className={cn(
-                    "w-full md:w-80 lg:w-96 border-r border-border/30 bg-card flex flex-col",
-                    selectedChat && "hidden md:flex"
-                )}>
-                    <div className="border-b border-border/30 p-4 flex-shrink-0">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-bold">Chats</h2>
-                            <Button size="icon" variant="ghost" className="h-9 w-9">
-                                <MoreVertical className="h-5 w-5" />
-                            </Button>
-                        </div>
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input
-                                placeholder="Search conversations..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9 h-10"
-                            />
-                        </div>
+            {/* Chat List Sidebar */}
+            <div className={cn(
+                "w-full md:w-80 lg:w-96 border-r border-border/30 bg-card flex flex-col",
+                selectedChat && "hidden md:flex"
+            )}>
+                <div className="border-b border-border/30 p-4 flex-shrink-0">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xl font-bold">Chats</h2>
+                        <Button size="icon" variant="ghost" className="h-9 w-9">
+                            <MoreVertical className="h-5 w-5" />
+                        </Button>
                     </div>
-
-                    <div className="flex-1 overflow-y-auto">
-                        {chatsLoading ? (
-                            <div className="flex justify-center items-center h-32">
-                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                            </div>
-                        ) : filteredChats.length > 0 ? (
-                            filteredChats.map((chat) => (
-                                <button
-                                    key={chat.chatRoomId}
-                                    onClick={() => handleSelectChat(chat)}
-                                    className={cn(
-                                        "w-full border-b border-border/20 p-4 text-left transition-colors hover:bg-accent/50",
-                                        selectedChat?.chatRoomId === chat.chatRoomId && "bg-accent"
-                                    )}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <div className="relative flex-shrink-0">
-                                            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-base">
-                                                {chat.otherUser?.fullName?.charAt(0) || "U"}
-                                            </div>
-                                            <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-card bg-green-500" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between gap-2 mb-1">
-                                                <span className="font-semibold text-sm truncate">
-                                                    {chat.otherUser?.fullName}
-                                                </span>
-                                                <span className="text-xs text-muted-foreground">
-                                                    {chat.lastActivityAt ? "Active" : ""}
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-muted-foreground truncate">
-                                                {chat.requestedSkill ? `Interested in ${chat.requestedSkill}` : "Start a conversation"}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </button>
-                            ))
-                        ) : (
-                            <div className="flex items-center justify-center h-32 text-muted-foreground">
-                                No chats found
-                            </div>
-                        )}
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            placeholder="Search conversations..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-9 h-10"
+                        />
                     </div>
                 </div>
 
-                {/* Main Message Window */}
-                <div className="flex-1 flex flex-col bg-background min-w-0">
-                    {selectedChat ? (
-                        <ChatRoom chat={selectedChat} updateChats={updateChats} />
+                <div className="flex-1 overflow-y-auto">
+                    {chatsLoading ? (
+                        <div className="flex justify-center items-center h-32">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        </div>
+                    ) : filteredChats.length > 0 ? (
+                        filteredChats.map((chat) => (
+                            <button
+                                key={chat.chatRoomId}
+                                onClick={() => handleSelectChat(chat)}
+                                className={cn(
+                                    "w-full border-b border-border/20 p-4 text-left transition-colors hover:bg-accent/50",
+                                    selectedChat?.chatRoomId === chat.chatRoomId && "bg-accent"
+                                )}
+                            >
+                                <div className="flex items-start gap-3">
+                                    <div className="relative flex-shrink-0">
+                                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-base">
+                                            {chat.otherUser?.fullName?.charAt(0) || "U"}
+                                        </div>
+                                        <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-card bg-green-500" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between gap-2 mb-1">
+                                            <span className="font-semibold text-sm truncate">
+                                                {chat.otherUser?.fullName}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground">
+                                                {chat.lastActivityAt ? "Active" : ""}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground truncate">
+                                            {chat.requestedSkill ? `Interested in ${chat.requestedSkill}` : "Start a conversation"}
+                                        </p>
+                                    </div>
+                                </div>
+                            </button>
+                        ))
                     ) : (
-                        <div className="flex flex-1 items-center justify-center bg-muted/10">
-                            <div className="text-center p-4">
-                                <MessageSquare className="h-16 w-16 mx-auto text-muted-foreground/40 mb-4" />
-                                <h3 className="text-xl font-semibold text-muted-foreground">Select a conversation</h3>
-                                <p className="mt-2 text-sm text-muted-foreground">Choose a chat from the list to start messaging</p>
-                            </div>
+                        <div className="flex items-center justify-center h-32 text-muted-foreground">
+                            No chats found
                         </div>
                     )}
                 </div>
+            </div>
+
+            {/* Main Message Window */}
+            <div className="flex-1 flex flex-col bg-background min-w-0">
+                {selectedChat ? (
+                    <ChatRoom chat={selectedChat} updateChats={updateChats} />
+                ) : (
+                    <div className="flex flex-1 items-center justify-center bg-muted/10">
+                        <div className="text-center p-4">
+                            <MessageSquare className="h-16 w-16 mx-auto text-muted-foreground/40 mb-4" />
+                            <h3 className="text-xl font-semibold text-muted-foreground">Select a conversation</h3>
+                            <p className="mt-2 text-sm text-muted-foreground">Choose a chat from the list to start messaging</p>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
