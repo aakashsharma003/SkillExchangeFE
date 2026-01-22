@@ -32,7 +32,7 @@ const useAuthProvider = () => {
     sessionStorage.clear();
     setUser(null);
 
-    window.location.pathname = appRoutes.login;
+    window.location.pathname = appRoutes.root;
   };
 
   return {
