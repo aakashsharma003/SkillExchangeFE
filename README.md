@@ -15,7 +15,11 @@
 ## Overview
 Skill Exchange Community is a web application that enables users to:
 - Offer and request skill exchanges
+  ![WhatsApp Image 2026-01-22 at 1 30 32 PM](https://github.com/user-attachments/assets/1cb722f5-5d26-4559-8405-d82b2d703c7a)
+
 - Chat with other users
+  ![WhatsApp Image 2026-01-22 at 1 30 03 PM](https://github.com/user-attachments/assets/8f86b4c1-ca0a-4fec-8e02-26bc68e31c79)
+
 - Track progress and certifications
 - Manage profiles and session history
 
