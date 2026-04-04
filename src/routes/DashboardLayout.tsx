@@ -58,7 +58,7 @@ export default function DashboardLayout() {
           onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         />
 
-        <main className={`flex flex-col flex-1 h-full min-w-0 overflow-y-auto bg-gradient-to-br from-[#e4efe8] via-[#eef4f1] to-[#f9fbfb] p-0 pt-16 md:p-6 transition-all duration-300 ease-in-out md:pb-6 pb-[74px] ${isSidebarOpen ? "md:ml-64 ml-0" : "md:ml-20 ml-0"}`}>
+        <main className={`flex flex-col flex-1 h-full min-w-0 overflow-y-auto overflow-x-hidden bg-gradient-to-br from-[#e4efe8] via-[#eef4f1] to-[#f9fbfb] dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 p-0 pt-16 md:p-6 transition-all duration-300 ease-in-out md:pb-6 pb-[74px] ${isSidebarOpen ? "md:ml-64 ml-0" : "md:ml-20 ml-0"}`}>
           {/* Mobile Dynamic Island Top Bar */}
           <DynamicIsland />
 

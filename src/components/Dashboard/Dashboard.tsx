@@ -49,39 +49,39 @@ export default function Dashboard() {
     {
       label: "Total Connections",
       value: stats?.totalConnections || 0,
-      change: stats?.weekChange ? `+${stats.weekChange} this week` : "Steady",
+      change: stats?.weekChange || "Steady",
       icon: Users,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
+      color: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-50 dark:bg-blue-900/30",
     },
     {
       label: "Skills Exchanged",
       value: stats?.skillsExchanged || 0,
       change: "Progress",
       icon: Zap,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
+      color: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-50 dark:bg-emerald-900/30",
     },
     {
       label: "Skills Mastered",
       value: stats?.skillsMastered || 0,
       change: "Lifetime",
       icon: Award,
-      color: "text-purple-600",
-      bg: "bg-purple-50",
+      color: "text-purple-600 dark:text-purple-400",
+      bg: "bg-purple-50 dark:bg-purple-900/30",
     },
     {
       label: "Active Sessions",
       value: stats?.activeSessions || 0,
       change: "Scheduled",
       icon: Target,
-      color: "text-orange-600",
-      bg: "bg-orange-50",
+      color: "text-orange-600 dark:text-orange-400",
+      bg: "bg-orange-50 dark:bg-orange-900/30",
     },
   ], [stats])
 
   return (
-    <main className="flex-1 max-w-[1600px] mx-auto w-full space-y-6 pt-2 sm:pt-4 px-1 sm:px-2 md:px-0 min-h-screen">
+    <main className="flex-1 max-w-[1600px] mx-auto w-full space-y-6 pt-2 sm:pt-4 px-1 sm:px-2 md:px-0 min-h-screen overflow-x-hidden">
 
       {/* ── Greeting Header ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4 animate-in fade-in duration-500">
@@ -90,16 +90,16 @@ export default function Dashboard() {
             <div className="h-10 w-10 rounded-xl bg-black flex items-center justify-center shadow-sm">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 md:text-4xl">
               {greeting}, {firstName}
             </h1>
           </div>
-          <p className="text-sm font-medium text-slate-500 mt-2 ml-[52px]">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-2 ml-[52px]">
             Here's what's happening with your skill exchanges today.
           </p>
         </div>
 
-        <p className="text-sm font-medium text-slate-500 flex items-center gap-1 cursor-pointer hover:text-slate-800 transition-colors border border-slate-200 rounded-full px-4 py-2 bg-white shadow-sm self-start md:self-auto">
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1 cursor-pointer hover:text-slate-800 dark:hover:text-slate-200 transition-colors border border-slate-200 dark:border-slate-700 rounded-full px-4 py-2 bg-white dark:bg-slate-800 shadow-sm self-start md:self-auto">
           <Clock className="h-3.5 w-3.5" />
           {new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
         </p>
@@ -118,7 +118,7 @@ export default function Dashboard() {
               return (
                 <Card
                   key={metric.label}
-                  className="rounded-[20px] sm:rounded-[24px] border-none shadow-[0_4px_24px_-8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.08)] transition-all duration-300 group cursor-default"
+                  className="rounded-[20px] sm:rounded-[24px] border-none shadow-[0_4px_24px_-8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.08)] dark:shadow-none dark:border dark:border-slate-700/50 transition-all duration-300 group cursor-default bg-white dark:bg-slate-800/60"
                   style={{ animationDelay: `${i * 80}ms` }}
                 >
                   <CardContent className="p-4 sm:p-6">
@@ -128,10 +128,10 @@ export default function Dashboard() {
                       </div>
                       <ArrowUpRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
                     </div>
-                    <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{metric.value}</p>
+                    <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">{metric.value}</p>
                     <div className="flex items-center justify-between mt-1.5">
-                      <span className="text-xs sm:text-sm font-semibold text-slate-400">{metric.label}</span>
-                      <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-white text-slate-600 border border-slate-100 shadow-sm">{metric.change}</span>
+                      <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500">{metric.label}</span>
+                      <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-600 shadow-sm">{metric.change}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -165,7 +165,7 @@ export default function Dashboard() {
           {/* ── Recent Connections ── */}
           {stats?.recentConnections && stats.recentConnections.length > 0 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-900">
-              <Card className="rounded-[24px] border-none shadow-[0_4px_24px_-8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all duration-300">
+              <Card className="rounded-[24px] border-none shadow-[0_4px_24px_-8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all duration-300 dark:bg-slate-800/60 dark:border dark:border-slate-700/50">
                 <CardHeader className="pb-3 px-6">
                   <CardTitle className="text-base font-semibold flex items-center gap-2">
                     <Users className="h-4 w-4 text-slate-500" />
@@ -177,13 +177,13 @@ export default function Dashboard() {
                     {stats.recentConnections.map((conn, i) => (
                       <div
                         key={conn.userId + i}
-                        className="flex items-center gap-4 p-3 rounded-[16px] bg-slate-50/60 hover:bg-slate-50 transition-colors"
+                        className="flex items-center gap-4 p-3 rounded-[16px] bg-slate-50/60 dark:bg-slate-700/30 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
                       >
                         <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-200 to-slate-100 flex items-center justify-center font-semibold text-sm text-slate-600 shrink-0">
                           {conn.name?.charAt(0)?.toUpperCase() || "U"}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-slate-900 truncate">{conn.name}</p>
+                          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{conn.name}</p>
                           <p className="text-xs text-slate-500 truncate">{conn.skill}</p>
                         </div>
                         <span className="text-xs text-slate-400 font-medium shrink-0">{conn.timeAgo}</span>
@@ -199,7 +199,7 @@ export default function Dashboard() {
 
       {/* ── Notification Preferences ── */}
       <div className="pt-4 pb-8 w-full max-w-2xl mx-auto animate-in fade-in duration-500">
-        <Card className="rounded-[24px] border-none shadow-[0_4px_24px_-8px_rgba(0,0,0,0.02)] transition-all duration-300 hover:shadow-md">
+        <Card className="rounded-[24px] border-none shadow-[0_4px_24px_-8px_rgba(0,0,0,0.02)] transition-all duration-300 hover:shadow-md dark:bg-slate-800/60 dark:border dark:border-slate-700/50">
           <CardHeader className="pb-3 px-6">
             <CardTitle className="text-base font-semibold">Notification Preferences</CardTitle>
           </CardHeader>
@@ -210,8 +210,8 @@ export default function Dashboard() {
                   <Mail className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Email Notifications</p>
-                  <p className="text-xs font-medium text-slate-500">Receive updates via email</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Email Notifications</p>
+                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Receive updates via email</p>
                 </div>
               </div>
               <Switch
@@ -225,8 +225,8 @@ export default function Dashboard() {
                   <Smartphone className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">SMS Notifications</p>
-                  <p className="text-xs font-medium text-slate-500">Receive updates on your phone</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">SMS Notifications</p>
+                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Receive updates on your phone</p>
                 </div>
               </div>
               <Switch
