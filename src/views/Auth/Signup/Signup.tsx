@@ -18,22 +18,22 @@ const Signup = () => {
     fullName: '',
     email: '',
     phone: '',
-    skillsOffered: [],
+    skills: [],
     interests: [],
     password: '',
   });
-  const { fullName, email, phone, skillsOffered, interests, password } = formData;
+  const { fullName, email, phone, skills, interests, password } = formData;
 
   const setFormValue = (label: string, value: string) =>
     setFormData({ ...formData, [label]: value });
 
   const addSkillOffered = (skill: string) =>
-    setFormData({ ...formData, skillsOffered: [...formData.skillsOffered, skill] });
+    setFormData({ ...formData, skills: [...formData.skills, skill] });
 
   const removeSkillOffered = (skill: string) =>
     setFormData({
       ...formData,
-      skillsOffered: formData.skillsOffered.filter((val) => skill !== val),
+      skills: formData.skills.filter((val) => skill !== val),
     });
 
   const addInterest = (skill: string) =>
@@ -107,7 +107,7 @@ const Signup = () => {
 
             <SkillInput
               label="Can Teach"
-              skills={skillsOffered}
+              skills={skills}
               addSkill={addSkillOffered}
               removeSkill={removeSkillOffered}
             />

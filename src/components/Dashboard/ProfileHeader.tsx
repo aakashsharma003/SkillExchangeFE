@@ -8,15 +8,15 @@ import { User } from '@/types/user';
 export default function ProfileHeader({ user }: { user: User }) {
   const {
     fullName,
-    skillsOffered,
+    skills,
     bio,
     location,
-    githubLink,
-    linkedinLink,
-    youtubeLink,
-    instagramLink,
+    githubProfile,
+    linkedinProfile,
+    youtubeProfile,
+    instagramProfile,
   } = user;
-  const skillString = (skillsOffered ?? []).join(', ');
+  const skillString = (skills ?? []).join(', ');
 
   return (
     <section className='bg-white rounded-xl p-6 shadow'>
@@ -34,26 +34,26 @@ export default function ProfileHeader({ user }: { user: User }) {
         </div>
 
         <div className='ml-auto self-start flex gap-2 items-center'>
-          {youtubeLink && (
-            <a href={youtubeLink} target='_blank'>
+          {youtubeProfile && (
+            <a href={youtubeProfile} target='_blank'>
               <Youtube />
             </a>
           )}
 
-          {githubLink && (
-            <a href={githubLink} target='_blank'>
+          {githubProfile && (
+            <a href={githubProfile} target='_blank'>
               <Github />
             </a>
           )}
 
-          {linkedinLink && (
-            <a href={linkedinLink} target='_blank'>
+          {linkedinProfile && (
+            <a href={linkedinProfile} target='_blank'>
               <Linkedin />
             </a>
           )}
 
-          {instagramLink && (
-            <a href={instagramLink} target='_blank' title='Instagram'>
+          {instagramProfile && (
+            <a href={instagramProfile} target='_blank' title='Instagram'>
               <img
                 src={Instagram}
                 alt='instagram'

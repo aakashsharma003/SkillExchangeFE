@@ -39,7 +39,7 @@ export default function ReceivedReqCard({
   const handleAccept = async () => {
     if (selectedSkill === '')
       return toast.error('Please select a skill that you want to learn in return.');
-    
+
     try {
       setLoading(1);
       const res = await acceptRequest(id, selectedSkill);
@@ -122,7 +122,7 @@ export default function ReceivedReqCard({
           <div className='w-full'>
             <ReqCardSkillInput
               onSelect={(skill: any) => setSeletedSkill(skill)}
-              allSkills={(sender as any).skillsOffered ?? []}
+              allSkills={sender.skills ?? []}
             />
           </div>
         </div>

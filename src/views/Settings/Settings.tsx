@@ -2,13 +2,13 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-import LogoutModal from "@/views/Dashboard/LogoutModal"
 import { AlertCircle, HelpCircle, Flag, Trash2, X } from "lucide-react"
 import { deleteAccount, reportSuspiciousActivity } from "@/api/user"
 import toast from "react-hot-toast"
+import { useAuth } from "@/context/auth/useAuth"
 
 export default function Settings() {
-  const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const { logout } = useAuth()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [reportActivityDialog, setReportActivityDialog] = useState(false)
   const [activityDescription, setActivityDescription] = useState("")
@@ -110,7 +110,7 @@ export default function Settings() {
             </p>
           </div>
           <Button
-            onClick={() => setShowLogoutModal(true)}
+            onClick={() => window.dispatchEvent(new CustomEvent('trigger-island', { detail: { state: 'logout', onAccept: logout } }))}
             variant='outline'
             className='text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'
           >
@@ -285,13 +285,7 @@ export default function Settings() {
         </div>
       </Card>
 
-      {/* Logout Modal */}
-      {showLogoutModal && (
-        <LogoutModal
-          open={showLogoutModal}
-          onClose={() => setShowLogoutModal(false)}
-        />
-      )}
+
 
       {/* Delete Account Confirmation Modal */}
       {showDeleteConfirm && (

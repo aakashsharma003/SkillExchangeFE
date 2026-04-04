@@ -40,7 +40,7 @@
 
 //     try {
 //       setLoading(true);
-      
+
 //       // Fallback message if trimmed input is empty
 //       let msg = message.trim() || `Interested in a skill exchange? I would love to learn ${requestedSkill} from you!`;
 
@@ -141,20 +141,20 @@
 import { requestSkillExchange } from "@/api/exchange-request"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import type { IexchangeRequestFormData } from "@/types/swal-request"
@@ -235,15 +235,10 @@ export default function RequestSkillExchange({
                     <SelectValue placeholder="Select a skill" />
                   </SelectTrigger>
                   <SelectContent className="max-h-64">
-                    {/* Note: Ensure your backend uses 'skills' or 'skillsOffered' consistently */}
-                    {(user as any).skillsOffered?.map((s: string) => (
+                    {user.skills?.map((s: string) => (
                       <SelectItem key={s} value={s} className="cursor-pointer">
                         {s}
                       </SelectItem>
-                    )) || user?.skillsOffered?.map((s: string) => (
-                        <SelectItem key={s} value={s} className="cursor-pointer">
-                          {s}
-                        </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -264,9 +259,9 @@ export default function RequestSkillExchange({
               </div>
 
               {/* Action Button */}
-              <Button 
-                className="w-full h-11 text-base font-bold transition-all active:scale-95" 
-                onClick={onSubmit} 
+              <Button
+                className="w-full h-11 text-base font-bold transition-all active:scale-95"
+                onClick={onSubmit}
                 disabled={loading}
               >
                 {loading ? (

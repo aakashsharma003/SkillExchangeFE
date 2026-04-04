@@ -22,4 +22,9 @@ export type IMessage = {
   senderEmail?: string;
   content: string;
   createdAt: string;
+  /** Call-related fields */
+  messageType?: 'TEXT' | 'CALL_STARTED' | 'CALL_ENDED' | 'RECORDING';
+  callRecordId?: string;
+  recordingUrl?: string;
+  callDurationSeconds?: number;
 };
