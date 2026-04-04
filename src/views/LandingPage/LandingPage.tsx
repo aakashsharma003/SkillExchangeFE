@@ -217,12 +217,12 @@ const LandingPage = () => {
                 learn. Exchange skills, earn badges, and grow together.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="rounded-full h-12 px-8 text-base">
+                <Button size="lg" className="rounded-full h-12 px-8 text-base" onClick={handleSignUp}>
                   Start Exchanging
                   <ArrowRight className="ml-2 size-4" />
                 </Button>
-                <Button size="lg" variant="outline" className="rounded-full h-12 px-8 text-base bg-transparent">
-                  Browse Skills
+                <Button size="lg" variant="outline" className="rounded-full h-12 px-8 text-base bg-transparent" onClick={() => navigate("/login")}>
+                  Demo
                 </Button>
               </div>
               <div className="flex items-center justify-center gap-4 mt-6 text-sm text-muted-foreground">
