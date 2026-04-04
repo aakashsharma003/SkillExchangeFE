@@ -1,11 +1,10 @@
 import React, { useState } from "react"
 
-import { Bell, Award, Home, MessageSquare, Search, Settings, Target, Users, LogOut } from "lucide-react"
+import { Bell, Home, MessageSquare, Search, Settings, Target, Users, LogOut, CalendarDays } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
-import toast from "react-hot-toast"
 
 import appRoutes from "@/routes/appRoutes"
-import LogoutModal from "@/views/Dashboard/LogoutModal"
+import { useAuth } from "@/context/auth/useAuth"
 import { useUser } from "@/context/auth/useUser"
 
 interface NavigationItem {
@@ -16,14 +15,12 @@ interface NavigationItem {
 
 const navigation: NavigationItem[] = [
   { name: "Home", href: appRoutes.dashboard, icon: Home },
-  { name: "My Requests", href: appRoutes.skillExchangeRequests, icon: Users },
   { name: "Find Skills", href: appRoutes.findSkills, icon: Search },
   { name: "Chats", href: appRoutes.chats, icon: MessageSquare },
+  { name: "Calendar", href: appRoutes.calendar, icon: CalendarDays },
   // These routes are not fully implemented yet – we keep them in the UI but
   // show a toast instead of navigating to a 404.
-  { name: "Notifications", href: "/notifications", icon: Bell },
-  { name: "Certifications", href: appRoutes.certifications, icon: Award },
-  { name: "Challenges", href: appRoutes.skillChallenges, icon: Target },
+  { name: "Notifications", href: appRoutes.notifications, icon: Bell },
   { name: "Settings", href: appRoutes.settings, icon: Settings },
 ]
 
@@ -37,8 +34,8 @@ interface SidebarProps {
 export default function Sidebar({ currentPath = "/dashboard", onNavigate, isOpen = true, onToggle }: SidebarProps) {
   const navigate = useNavigate()
   const location = useLocation()
-  const [showLogoutModal, setShowLogoutModal] = useState(false)
-  
+  const { logout } = useAuth()
+
   // Get current user for profile display
   let currentUser = null
   try {
@@ -51,11 +48,6 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate, isOpen
   const activePath = currentPath || location.pathname
 
   const handleClick = (href: string) => {
-    // For unfinished sections, keep the UI but avoid broken navigation.
-    if (href === "/notifications") {
-      toast("This section is coming soon.")
-      return
-    }
 
     // Auto-shrink sidebar when clicking on Chats
     if (href === appRoutes.chats && isOpen) {
@@ -70,15 +62,18 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate, isOpen
   }
 
   const handleLogoutClick = () => {
-    setShowLogoutModal(true)
+    window.dispatchEvent(new CustomEvent('trigger-island', {
+      detail: {
+        state: 'logout',
+        onAccept: logout
+      }
+    }))
   }
 
   return (
-    <>
-      <LogoutModal open={showLogoutModal} onClose={() => setShowLogoutModal(false)} />
-      <div className={`fixed left-0 top-0 h-screen flex flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out ${
-        isOpen ? "w-64" : "w-20"
-      } z-40`}>
+    <>      
+      {/* Desktop Sidebar */}
+      <div className={`hidden md:flex fixed left-0 top-0 h-screen flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out ${isOpen ? "w-64" : "w-20"} z-40`}>
         {/* Header */}
         <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
           {isOpen && (
@@ -95,9 +90,7 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate, isOpen
             aria-label="Toggle sidebar"
           >
             <svg
-              className={`h-5 w-5 text-gray-600 transition-transform duration-300 ${
-                !isOpen ? "rotate-180" : ""
-              }`}
+              className={`h-5 w-5 text-gray-600 transition-transform duration-300 ${!isOpen ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -118,9 +111,7 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate, isOpen
                 key={item.name}
                 onClick={() => handleClick(item.href)}
                 title={!isOpen ? item.name : undefined}
-                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                  isActive ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                }`}
+                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${isActive ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
               >
                 <Icon className="h-5 w-5 shrink-0" />
                 {isOpen && <span>{item.name}</span>}
@@ -129,15 +120,12 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate, isOpen
           })}
         </nav>
 
-        {/* User Profile and Logout */}
+        {/* User Profile */}
         <div className="border-t border-gray-200 p-4 space-y-2">
           <button
-            // Use the existing edit-profile route so this always works from dashboard.
             onClick={() => handleClick(appRoutes.editProfile)}
             title={!isOpen ? "View Profile" : undefined}
-            className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-gray-50 ${
-              activePath === appRoutes.editProfile ? "bg-gray-100" : ""
-            }`}
+            className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-gray-50 ${activePath === appRoutes.editProfile ? "bg-gray-100" : ""}`}
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200">
               <span className="text-sm font-medium text-gray-700">
@@ -145,26 +133,57 @@ export default function Sidebar({ currentPath = "/dashboard", onNavigate, isOpen
               </span>
             </div>
             {isOpen && (
-              <div className="flex-1 overflow-hidden text-left">
+              <div className="flex-1 overflow-hidden text-left hover:text-gray-600">
                 <p className="truncate text-sm font-semibold text-gray-900">
                   {currentUser?.fullName || "User"}
                 </p>
-                <p className="truncate text-xs text-gray-500">View Profile</p>
+                <p className="truncate text-xs text-gray-500">Edit Profile</p>
               </div>
             )}
           </button>
-          
-          {/* Logout Button */}
-          {/* <button
+          <button
             onClick={handleLogoutClick}
-            title={!isOpen ? "Logout" : undefined}
-            className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+            title={!isOpen ? "Log out" : undefined}
+            className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-red-50 text-gray-600 hover:text-red-600`}
           >
             <LogOut className="h-5 w-5 shrink-0" />
-            {isOpen && <span>Logout</span>}
-          </button> */}
+            {isOpen && <span className="text-sm font-medium">Log out</span>}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Bottom Appbar */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 z-50 flex items-center justify-around h-[64px] px-2 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
+        {navigation.map((item) => {
+           // On mobile, let's limit nav items to top 4 to prevent crowding, mostly core functionalities
+           if (!['Home', 'Find Skills', 'Chats', 'Calendar'].includes(item.name)) return null;
+
+           const isActive = activePath === item.href
+           const Icon = item.icon
+           return (
+              <button 
+                  key={item.name} 
+                  onClick={() => handleClick(item.href)} 
+                  className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive ? "text-slate-900" : "text-gray-400 hover:text-gray-600"}`}
+              >
+                 <Icon className={`h-[22px] w-[22px] ${isActive ? "fill-slate-900/10 stroke-[2.5px]" : "stroke-2"}`} />
+                 <span className={`text-[10px] tracking-wide ${isActive ? "font-bold" : "font-medium"}`}>{item.name}</span>
+              </button>
+           )
+        })}
+        {/* Profile Mobile */}
+        <button 
+             onClick={() => handleClick(appRoutes.editProfile)} 
+             className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${activePath === appRoutes.editProfile ? "text-slate-900" : "text-gray-400 hover:text-gray-600"}`}
+        >
+             <div className={`flex h-[24px] w-[24px] items-center justify-center rounded-full bg-slate-100 ${activePath === appRoutes.editProfile ? "ring-2 ring-slate-900 ring-offset-1" : ""}`}>
+                 <span className="text-[11px] font-bold text-gray-700">
+                    {currentUser?.fullName?.charAt(0).toUpperCase() || "U"}
+                 </span>
+             </div>
+             <span className={`text-[10px] tracking-wide ${activePath === appRoutes.editProfile ? "font-bold" : "font-medium"}`}>Profile</span>
+        </button>
+      </nav>
     </>
   )
 }

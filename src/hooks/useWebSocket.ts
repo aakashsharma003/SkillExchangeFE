@@ -50,10 +50,22 @@ export function useWebSocket({ userId, onNotification }: UseWebSocketOptions) {
           try {
             const notification: Notification = JSON.parse(payload.body);
             
-            // Show toast notification
-            toast.success(notification.message || notification.title, {
-              duration: 5000,
-            });
+              const typeStr = (notification.type || "").toUpperCase();
+              const state = (typeStr.includes("EXCHANGE") || typeStr.includes("REQUEST") || typeStr.includes("MATCH")) 
+                ? "alert" 
+                : "message";
+                
+              window.dispatchEvent(new CustomEvent('trigger-island', {
+                detail: {
+                  state,
+                  title: notification.title,
+                  subtitle: notification.message,
+                  onClick: () => {
+                    if (state === "alert") window.location.href = "/notifications";
+                    else window.location.href = "/chats";
+                  }
+                }
+              }));
             
             // Call custom handler if provided
             if (onNotification) {
