@@ -218,7 +218,7 @@ const LandingPage = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" className="rounded-full h-12 px-8 text-base" onClick={handleSignUp}>
-                  Start Exchanging
+                  Start Exchange
                   <ArrowRight className="ml-2 size-4" />
                 </Button>
                 <Button size="lg" variant="outline" className="rounded-full h-12 px-8 text-base bg-transparent" onClick={() => navigate("/login")}>
@@ -791,16 +791,17 @@ const LandingPage = () => {
                 our platform.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                <Button size="lg" variant="secondary" className="rounded-full h-12 px-8 text-base">
-                  Start Free Trial
+                <Button size="lg" variant="secondary" className="rounded-full h-12 px-8 text-base" onClick={handleSignUp}>
+                  Start Exchange
                   <ArrowRight className="ml-2 size-4" />
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
                   className="rounded-full h-12 px-8 text-base bg-transparent border-white text-white hover:bg-white/10"
+                  onClick={() => navigate("/login")}
                 >
-                  Schedule a Demo
+                  Demo
                 </Button>
               </div>
               <p className="text-sm text-primary-foreground/80 mt-4">
