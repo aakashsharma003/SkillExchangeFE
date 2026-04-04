@@ -49,7 +49,7 @@ export default function Profile() {
   }, [email, navigate])
 
   return (
-    <div className="space-y-8 p-8">
+    <div className="space-y-6 sm:space-y-8 p-4 sm:p-8">
       {loading || !user ? (
         <div className="flex items-center justify-center">
           <Loader2 className="mx-auto my-2 h-24 w-24 animate-spin" />
