@@ -28,7 +28,7 @@ export default function Profile() {
       return
     }
 
-    ;(async () => {
+    ; (async () => {
       try {
         setLoading(true)
 
@@ -60,7 +60,7 @@ export default function Profile() {
 
           <Badges />
 
-          <SkillsOffered skills={user.skillsOffered} />
+          <SkillsOffered skills={user.skills} />
 
           <ProgressTracker learningProgress={user.learningProgress ?? {}} />
 

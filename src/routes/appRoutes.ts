@@ -16,6 +16,8 @@ const appRoutes = {
   certifications: '/certifications',
   skillChallenges: '/skill-challenges',
   settings: '/settings',
+  calendar: '/calendar',
+  notifications: '/notifications',
 } as const;
 
 export default appRoutes;

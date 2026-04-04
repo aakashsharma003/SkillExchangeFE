@@ -1,6 +1,9 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
-import { useState, createContext, useContext } from "react"
+import { useState, createContext, useContext, useEffect } from "react"
 import Sidebar from "@/components/Dashboard/SideBar"
+import DynamicIsland from "@/components/ui/DynamicIsland"
+import { Menu } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
 
 // Context for sidebar state
 type SidebarContextType = {
@@ -18,20 +21,28 @@ export const useSidebar = () => {
   return context
 }
 
-/**
- * Shared layout for all dashboard-style pages.
- *
- * - Renders the left sidebar once and keeps it mounted while only the
- *   right-hand content switches via nested routes.
- * - Ensures smoother navigation when switching between "Home", "My Requests",
- *   "Find Skills", "Certifications", etc.
- * - Sidebar is fixed and collapsible
- * - Main content area is scrollable
- */
 export default function DashboardLayout() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth >= 768)
+
+  // Auto-close sidebar on mobile when route changes
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false)
+    }
+  }, [location.pathname])
+
+  // Close sidebar on resize to mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false)
+      }
+    }
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   const handleNavigate = (href: string) => {
     navigate(href)
@@ -39,21 +50,32 @@ export default function DashboardLayout() {
 
   return (
     <SidebarContext.Provider value={{ isSidebarOpen, setSidebarOpen: setIsSidebarOpen }}>
-      <div className="flex h-screen bg-gray-100">
-        <Sidebar 
-          currentPath={location.pathname} 
+      <div className="flex h-screen bg-background overflow-hidden relative">
+        <Sidebar
+          currentPath={location.pathname}
           onNavigate={handleNavigate}
           isOpen={isSidebarOpen}
           onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         />
-        <main className={`flex-1 overflow-y-auto transition-all duration-300 ease-in-out ${
-          isSidebarOpen ? "ml-64" : "ml-20"
-        }`}>
-          <Outlet />
+
+        <main className={`flex flex-col flex-1 h-full min-w-0 overflow-y-auto bg-gradient-to-br from-[#e4efe8] via-[#eef4f1] to-[#f9fbfb] p-0 pt-16 md:p-6 transition-all duration-300 ease-in-out md:pb-6 pb-[74px] ${isSidebarOpen ? "md:ml-64 ml-0" : "md:ml-20 ml-0"}`}>
+          {/* Mobile Dynamic Island Top Bar */}
+          <DynamicIsland />
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, scale: 0.98, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.98, y: -10 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="w-full max-w-[1600px] mx-auto p-4 md:p-0 flex-1 flex flex-col h-[calc(100%-65px)] md:h-full min-h-0"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </SidebarContext.Provider>
   )
 }
-
-

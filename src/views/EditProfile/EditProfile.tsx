@@ -27,12 +27,12 @@ export default function EditProfile() {
   }
 
   const addSkillOffered = (skill: string) =>
-    setFormData({ ...formData, skillsOffered: [...(formData.skillsOffered ?? []), skill] })
+    setFormData({ ...formData, skills: [...(formData.skills ?? []), skill] })
 
   const removeSkillOffered = (skill: string) =>
     setFormData({
       ...formData,
-      skillsOffered: (formData.skillsOffered ?? []).filter((val) => skill !== val),
+      skills: (formData.skills ?? []).filter((val) => skill !== val),
     })
 
   const addInterest = (skill: string) =>
@@ -130,7 +130,7 @@ export default function EditProfile() {
 
             <SkillInput
               label="Can Teach"
-              skills={formData.skillsOffered ?? []}
+              skills={formData.skills ?? []}
               addSkill={addSkillOffered}
               removeSkill={removeSkillOffered}
             />
@@ -146,8 +146,8 @@ export default function EditProfile() {
               <Label htmlFor="linkedin">LinkedIn URL</Label>
               <Input
                 id="linkedin"
-                value={formData.linkedinLink ?? ""}
-                onChange={(e) => setFormValue("linkedinLink", e.target.value)}
+                value={formData.linkedinProfile ?? ""}
+                onChange={(e) => setFormValue("linkedinProfile", e.target.value)}
                 placeholder="Your LinkedIn URL"
               />
             </div>
@@ -156,8 +156,8 @@ export default function EditProfile() {
               <Label htmlFor="github">GitHub URL</Label>
               <Input
                 id="github"
-                value={formData.githubLink ?? ""}
-                onChange={(e) => setFormValue("githubLink", e.target.value)}
+                value={formData.githubProfile ?? ""}
+                onChange={(e) => setFormValue("githubProfile", e.target.value)}
                 placeholder="Your GitHub URL"
               />
             </div>
