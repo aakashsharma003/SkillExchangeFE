@@ -483,7 +483,7 @@ export default function ChatRoom({
                       key={msg.id || index}
                       className={`flex flex-col gap-1 group ${isMe ? "items-end" : "items-start"}`}
                     >
-                      <div className={`flex items-end gap-3 min-w-0 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+                      <div className={`flex items-end gap-2 sm:gap-3 max-w-full w-full ${isMe ? "flex-row-reverse" : "flex-row"}`}>
                         {!isMe && (
                           <Avatar className="h-10 w-10 shrink-0 mb-1 border border-black/5 shadow-sm">
                             <AvatarFallback className="text-[12px] bg-muted/60 text-black font-semibold">
@@ -493,7 +493,7 @@ export default function ChatRoom({
                         )}
 
                         <div
-                          className={`w-fit min-w-[60px] max-w-[75%] sm:max-w-[80%] md:max-w-[70%] px-4 sm:px-5 py-3 shadow-sm transition-all duration-200 ${isFlagged
+                          className={`relative w-auto max-w-[75%] sm:max-w-[80%] md:max-w-[70%] px-4 sm:px-5 py-2.5 sm:py-3 shadow-sm transition-all duration-200 ${isFlagged
                             ? "rounded-[24px] bg-[#fdf2f2] border border-red-100"
                             : isMe
                               ? "rounded-[24px] rounded-br-[6px] bg-white text-black hover:shadow-md animate-in slide-in-from-right-2 fade-in border border-black/5"
