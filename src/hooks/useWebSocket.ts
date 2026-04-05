@@ -50,6 +50,10 @@ export function useWebSocket({ userId, onNotification }: UseWebSocketOptions) {
           try {
             const notification: Notification = JSON.parse(payload.body);
             
+            // Play notification sound
+            const audio = new Audio('/sound.mp3');
+            audio.play().catch(e => console.log('Audio play failed:', e));
+            
               const typeStr = (notification.type || "").toUpperCase();
               const state = (typeStr.includes("EXCHANGE") || typeStr.includes("REQUEST") || typeStr.includes("MATCH")) 
                 ? "alert" 
