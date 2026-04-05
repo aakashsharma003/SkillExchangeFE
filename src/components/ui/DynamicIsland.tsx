@@ -93,7 +93,7 @@ export default function DynamicIsland() {
           animate={activeState}
           variants={variants}
           transition={{ duration: 0.42, ease: [0.32, 0, 0.12, 1] }}
-          className={`bg-black text-white relative overflow-hidden shadow-2xl ${animatingBounce ? "animate-island-bounce" : ""}`}
+          className={`bg-black text-white relative overflow-hidden shadow-2xl max-w-[95vw] ${animatingBounce ? "animate-island-bounce" : ""}`}
           onAnimationEnd={() => setAnimatingBounce(false)}
           style={{ willChange: "width, height, border-radius" }}
         >

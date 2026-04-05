@@ -58,7 +58,7 @@ export default function Settings() {
   }
 
   return (
-    <div className='w-full max-w-3xl mx-auto px-4 py-8'>
+    <div className='w-full max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8'>
       <h1 className='text-3xl font-bold mb-8 text-gray-900 dark:text-white'>
         Settings
       </h1>
@@ -100,7 +100,7 @@ export default function Settings() {
 
       {/* Logout Section */}
       <Card className='mb-6 p-6 border border-gray-200 dark:border-gray-700'>
-        <div className='flex items-center justify-between'>
+        <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0'>
           <div>
             <h2 className='text-lg font-semibold text-gray-900 dark:text-white'>
               Sign Out

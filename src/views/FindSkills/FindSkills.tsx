@@ -36,10 +36,10 @@ const FindSkills = () => {
   }, [])
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full p-4 sm:p-6 md:p-8">
       <div className="mx-auto max-w-full">
         <div className="mb-8">
-          <h1 className="text-4xl font-extrabold tracking-tight">SkillExchange</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">SkillExchange</h1>
           <p className="mt-2 text-lg text-muted-foreground">
             Discover people with the skills you want to learn.
           </p>
@@ -50,12 +50,12 @@ const FindSkills = () => {
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search for skills (e.g. React, Salesforce)..."
-            className="h-14 pl-12 text-lg shadow-sm"
+            className="h-14 pl-12 pr-24 text-base sm:text-lg shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery)}
           />
-          <Button className="absolute right-2 top-2 h-10 px-6" onClick={() => handleSearch(searchQuery)}>
+          <Button className="absolute right-2 top-2 h-10 px-4 sm:px-6" onClick={() => handleSearch(searchQuery)}>
             Search
           </Button>
         </div>

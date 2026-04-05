@@ -125,7 +125,7 @@ export default function Calendar() {
     }
 
     return (
-        <main className="flex-1 p-8 space-y-6 bg-background">
+        <main className="flex-1 p-4 md:p-8 lg:p-8 space-y-6 bg-background">
             {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl flex items-center gap-3">
