@@ -8,7 +8,7 @@ import { NotificationProvider } from './context/notifications/NotificationProvid
 
 function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
        <ConfigProvider>
       <AuthProvider>
         <NotificationProvider>
